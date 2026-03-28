@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.util.List;
 
@@ -12,12 +13,12 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 @Data
-@AllArgsConstructor
+@SuperBuilder
 @NoArgsConstructor
 @PrimaryKeyJoinColumn(name = "user_id")
 public class User extends Person{
 
-    @OneToMany(mappedBy = "users", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Registration> registration;
 }
 
