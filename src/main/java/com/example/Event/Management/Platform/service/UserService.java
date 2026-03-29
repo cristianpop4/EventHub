@@ -13,6 +13,7 @@ public interface UserService {
     List<UserResponseDto> getAllUsers();
     void deleteUserById (Long id);
     UserResponseDto update(Long id, UserUpdateDto dto);
+
     default UserResponseDto toDto(User user){
         return new UserResponseDto(
                 user.getId(),
