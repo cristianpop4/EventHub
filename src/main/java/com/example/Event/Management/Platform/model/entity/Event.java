@@ -2,9 +2,8 @@ package com.example.Event.Management.Platform.model.entity;
 
 import com.example.Event.Management.Platform.model.enums.EventCategory;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -12,8 +11,7 @@ import java.util.List;
 @Entity
 @Table(name = "events")
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
+@Builder
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

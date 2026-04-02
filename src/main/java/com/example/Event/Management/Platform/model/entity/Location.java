@@ -20,7 +20,8 @@ public class Location {
     @OneToMany(mappedBy = "location", cascade = CascadeType.ALL)
     private List<Event> events;
 
-    private String street;
+    private String streetName;
+    private Integer number;
     private String city;
     private String zipCode;
 }
