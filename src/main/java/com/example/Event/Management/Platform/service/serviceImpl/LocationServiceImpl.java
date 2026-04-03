@@ -15,7 +15,7 @@ public class LocationServiceImpl implements LocationService {
     public Location getOrCreateLocation(LocationRequestDto request){
         return repository.findByStreetNameNumberCityZipCode(request.streetName(), request.number(), request.city(), request.zipCode())
                 .orElseGet(()->{
-                    Location location = new Location(null, null, request.streetName(), request.number(), request.city(), request.zipCode());
+                    Location location = new Location(null, null, request.streetName(), request.number(), request.city().toUpperCase(), request.zipCode());
                     return repository.save(location);
                 });
 

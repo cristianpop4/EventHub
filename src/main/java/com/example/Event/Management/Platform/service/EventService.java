@@ -1,12 +1,18 @@
 package com.example.Event.Management.Platform.service;
 
-import com.example.Event.Management.Platform.model.dto.EventRequestDto;
-import com.example.Event.Management.Platform.model.dto.EventResponseDto;
-import com.example.Event.Management.Platform.model.dto.LocationResponseDto;
+import com.example.Event.Management.Platform.model.dto.*;
 import com.example.Event.Management.Platform.model.entity.Event;
+
+import java.util.List;
 
 public interface EventService {
     EventResponseDto createEvent(EventRequestDto eventRequest);
+    List<String> getAllCategories();
+    EventResponseDto getEventById(Long id);
+    List<EventResponseDto> getAllEvents();
+    EventResponseDto updateEvent(Long id, EventUpdateDto dto);
+    void deleteEventById(Long id);
+    List<EventResponseDto> searchEvents(EventSearchDto search);
 
     default EventResponseDto toDto(Event event){
         return new EventResponseDto(
