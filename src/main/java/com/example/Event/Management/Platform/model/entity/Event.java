@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -39,5 +40,8 @@ public class Event {
     private Organizer organizer;
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
-    private List<Registration> registration;
+    private List<Ticket> tickets = new ArrayList<>();
+
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
+    private List<Booking> bookings = new ArrayList<>();
 }

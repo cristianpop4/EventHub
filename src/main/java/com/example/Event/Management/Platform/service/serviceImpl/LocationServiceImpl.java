@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 public class LocationServiceImpl implements LocationService {
     private final LocationRepository repository;
 
+    @Override
     public Location getOrCreateLocation(LocationRequestDto request){
         return repository.findByStreetNameAndNumberAndCityAndZipCode(request.streetName(), request.number(), request.city(), request.zipCode())
                 .orElseGet(()->{

@@ -18,6 +18,6 @@ import java.util.List;
 public class User extends Person{
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Registration> registration;
+    private List<Booking> booking;
 }
 

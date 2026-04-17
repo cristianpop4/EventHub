@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -21,14 +22,13 @@ public class Ticket {
     @Enumerated(EnumType.STRING)
     private TicketType type;
 
-    private double price;
-
-    private int availableQuantity;
+    private Double price;
+    private Integer availableQuantity;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id")
     private Event event;
 
-    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL)
-    private List<Registration> registrations;
+    @OneToMany(mappedBy = "ticket")
+    private List<Booking> bookings = new ArrayList<>();
 }

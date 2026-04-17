@@ -16,6 +16,7 @@ import java.util.List;
 public class OrganizerServiceImpl implements OrganizerService {
     private final OrganizerRepository repository;
 
+    @Override
     public OrganizerResponseDto createOrganizer(OrganizerRequestDto request) {
         repository.findByEmail(request.email())
                 .ifPresent(organizer -> {
@@ -31,6 +32,7 @@ public class OrganizerServiceImpl implements OrganizerService {
         return toDto(repository.save(organizer));
     }
 
+    @Override
     public OrganizerResponseDto getOrganizerById(Long id) {
         return toDto(
                 repository.findById(id)
@@ -38,6 +40,7 @@ public class OrganizerServiceImpl implements OrganizerService {
         );
     }
 
+    @Override
     public List<OrganizerResponseDto> getAllOrganizers() {
         return repository.findAll()
                 .stream()
@@ -45,6 +48,7 @@ public class OrganizerServiceImpl implements OrganizerService {
                 .toList();
     }
 
+    @Override
     public OrganizerResponseDto update(Long id,OrganizerUpdateDto updateDto){
         Organizer organizer = repository.findById(id)
                 .orElseThrow(()-> new RuntimeException("Organizer not found"));
@@ -56,6 +60,7 @@ public class OrganizerServiceImpl implements OrganizerService {
         return toDto(repository.save(organizer));
     }
 
+    @Override
     public void deleteOrganizerById(Long id){
         Organizer organizer = repository.findById(id)
                 .orElseThrow(()-> new RuntimeException("Organizer not found"));

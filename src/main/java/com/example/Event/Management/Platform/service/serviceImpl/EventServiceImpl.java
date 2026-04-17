@@ -26,6 +26,7 @@ public class EventServiceImpl implements EventService {
     private final LocationServiceImpl locationService;
     private final OrganizerRepository organizerRepository;
 
+    @Override
     public EventResponseDto createEvent(EventRequestDto eventRequest) {
         Organizer organizer = organizerRepository.findById(eventRequest.organizerId())
                 .orElseThrow(() -> new RuntimeException("Organizer not found"));
@@ -45,12 +46,14 @@ public class EventServiceImpl implements EventService {
         return toDto(eventRepository.save(event));
     }
 
+    @Override
     public List<String> getAllCategories() {
         return Arrays.stream(EventCategory.values())
                 .map(Enum::name)
                 .toList();
     }
 
+    @Override
     public EventResponseDto getEventById(Long id) {
         return toDto(
                 eventRepository.findById(id)
@@ -58,6 +61,7 @@ public class EventServiceImpl implements EventService {
         );
     }
 
+    @Override
     public EventResponseDto updateEvent(Long id, EventUpdateDto dto) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Organizer not found"));
@@ -78,6 +82,7 @@ public class EventServiceImpl implements EventService {
         return toDto(eventRepository.save(event));
     }
 
+    @Override
     public EventResponseDto partialUpdateEvent(Long id, EventUpdateDto dto) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Event not found"));
@@ -100,6 +105,7 @@ public class EventServiceImpl implements EventService {
         return toDto(eventRepository.save(event));
     }
 
+    @Override
     public void deleteEventById(Long id) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Event not found"));
@@ -107,9 +113,9 @@ public class EventServiceImpl implements EventService {
         eventRepository.delete(event);
     }
 
+    @Override
     public List<EventResponseDto> searchEvents(EventSearchDto search) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
 
         return eventRepository.searchEvents(
                         search.name(),

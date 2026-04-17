@@ -16,6 +16,7 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
     private final UserRepository repository;
 
+    @Override
     public UserResponseDto createUser(UserRequestDto request){
         repository.findByEmail(request.email())
                 .ifPresent(user -> {
@@ -31,6 +32,7 @@ public class UserServiceImpl implements UserService {
         return toDto(repository.save(user));
     }
 
+    @Override
     public UserResponseDto getUserById (Long id){
          return toDto(
                  repository.findById(id)
@@ -38,6 +40,7 @@ public class UserServiceImpl implements UserService {
          );
     }
 
+    @Override
     public List<UserResponseDto> getAllUsers(){
         return repository.findAll()
                 .stream()
@@ -45,6 +48,7 @@ public class UserServiceImpl implements UserService {
                 .toList();
     }
 
+    @Override
     public UserResponseDto update(Long id, UserUpdateDto dto){
         User user = repository.findById(id)
                 .orElseThrow(()-> new RuntimeException("User not found"));
@@ -56,6 +60,7 @@ public class UserServiceImpl implements UserService {
         return toDto(repository.save(user));
     }
 
+    @Override
     public void deleteUserById (Long id){
         User user = repository.findById(id)
                         .orElseThrow(()-> new RuntimeException("User not found"));
