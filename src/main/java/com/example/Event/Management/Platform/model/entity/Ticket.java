@@ -28,7 +28,4 @@ public class Ticket {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id")
     private Event event;
-
-    @OneToMany(mappedBy = "ticket")
-    private List<Booking> bookings = new ArrayList<>();
 }

@@ -1,12 +1,12 @@
 package com.example.Event.Management.Platform.model.entity;
 
+import com.example.Event.Management.Platform.model.enums.BookingStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
 @Table(name = "bookings")
@@ -30,7 +30,6 @@ public class Booking {
     @JoinColumn(name = "ticket_id")
     private Ticket ticket;
 
-    private int quantity;
-
+    private BookingStatus status = BookingStatus.NONE;
     private LocalDateTime registeredAt;
 }

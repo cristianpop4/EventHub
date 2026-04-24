@@ -86,31 +86,33 @@ public class TicketServiceImpl implements TicketServiceForController, TicketServ
     }
 
     @Override
-    public boolean checkAvailability(Long ticketId, Integer quantity) {
+    public boolean checkAvailability(Long ticketId) {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(()-> new RuntimeException("Ticket not found"));
 
-        if (quantity == null || quantity <= 0) {
-            throw new RuntimeException("Quantity must be greater than 0");
-        }
-
-        return ticket.getAvailableQuantity() >= quantity;
+        return ticket.getAvailableQuantity() >= 1;
     }
 
     @Override
-    public void decreaseAvailability(Long ticketId, Integer quantity) {
+    public void decreaseAvailability(Long ticketId) {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(()-> new RuntimeException("Ticket not found"));
 
-        if (quantity == null || quantity <= 0) {
-            throw new RuntimeException("Quantity must be greater than 0");
-        }
-
-        if (ticket.getAvailableQuantity() < quantity) {
+        if (ticket.getAvailableQuantity() < 1) {
             throw new RuntimeException("Not enough tickets available");
         }
 
-        ticket.setAvailableQuantity(ticket.getAvailableQuantity() - quantity);
+        ticket.setAvailableQuantity(ticket.getAvailableQuantity() - 1);
+
+        ticketRepository.save(ticket);
+    }
+
+    @Override
+    public void increaseAvailability(Long ticketId) {
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(()-> new RuntimeException("Ticket not found"));
+
+        ticket.setAvailableQuantity(ticket.getAvailableQuantity() + 1);
 
         ticketRepository.save(ticket);
     }

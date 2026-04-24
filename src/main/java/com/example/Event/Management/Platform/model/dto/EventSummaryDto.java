@@ -8,5 +8,6 @@ public record EventSummaryDto(
         Long id,
         String name,
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-        LocalDateTime date
+        LocalDateTime date,
+        LocationResponseDto location
 ) { }

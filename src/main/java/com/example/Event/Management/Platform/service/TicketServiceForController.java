@@ -18,7 +18,14 @@ public interface TicketServiceForController {
                 new EventSummaryDto(
                         ticket.getEvent().getId(),
                         ticket.getEvent().getName(),
-                        ticket.getEvent().getDate()
+                        ticket.getEvent().getDate(),
+                        new LocationResponseDto(
+                                ticket.getEvent().getLocation().getId(),
+                                ticket.getEvent().getLocation().getStreetName(),
+                                ticket.getEvent().getLocation().getNumber(),
+                                ticket.getEvent().getLocation().getCity(),
+                                ticket.getEvent().getLocation().getZipCode()
+                        )
                 ),
                 ticket.getType(),
                 ticket.getPrice(),
