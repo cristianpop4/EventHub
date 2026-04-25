@@ -23,7 +23,7 @@ public class BookingController {
     }
 
     @Operation(summary = "Get booking by id")
-    @GetMapping("/{id}")
+    @GetMapping("/{bookingId}")
     public BookingResponseDto getBookingById(@PathVariable Long bookingId) {
         return bookingService.getBookingById(bookingId);
     }
@@ -35,13 +35,13 @@ public class BookingController {
     }
 
     @Operation(summary = "Get bookings by userId")
-    @GetMapping("/users/{id}")
+    @GetMapping("/users/{userId}")
     public List<BookingResponseDto> getBookingsByUserId(@PathVariable Long userId) {
         return bookingService.getBookingsByUserId(userId);
     }
 
     @Operation(summary = "Get bookings by eventId")
-    @GetMapping("/events/{id}")
+    @GetMapping("/events/{eventId}")
     public List<BookingResponseDto> getBookingsByEventId(@PathVariable Long eventId) {
         return bookingService.getBookingsByEventId(eventId);
     }
@@ -53,19 +53,19 @@ public class BookingController {
     }
 
     @Operation(summary = "Get bookings by userId and status")
-    @GetMapping("/statuses/users/{id}")
+    @GetMapping("/statuses/users/{userId}")
     public List<BookingResponseDto> getBookingsByUserIdAndStatus(@PathVariable Long userId,@RequestParam BookingStatus status){
         return bookingService.getBookingsByUserIdAndStatus(userId, status);
     }
 
     @Operation(summary = "Confirm booking")
-    @PutMapping("/confirmations/{id}")
+    @PutMapping("/confirmations/{bookingId}")
     public BookingResponseDto confirmBooking(@PathVariable Long bookingId){
         return bookingService.confirmBooking(bookingId);
     }
 
     @Operation(summary = "Cancel booking")
-    @PutMapping("/cancellations/{id}")
+    @PutMapping("/cancellations/{bookingId}")
     public void cancelBooking(@PathVariable Long bookingId){
         bookingService.cancelBooking(bookingId);
     }

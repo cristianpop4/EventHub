@@ -5,6 +5,8 @@ import com.example.Event.Management.Platform.model.dto.TicketResponseDto;
 import com.example.Event.Management.Platform.model.dto.TicketUpdateDto;
 import com.example.Event.Management.Platform.model.entity.Event;
 import com.example.Event.Management.Platform.model.entity.Ticket;
+import com.example.Event.Management.Platform.model.enums.EventCategory;
+import com.example.Event.Management.Platform.model.enums.TicketType;
 import com.example.Event.Management.Platform.repository.EventRepository;
 import com.example.Event.Management.Platform.repository.TicketRepository;
 import com.example.Event.Management.Platform.service.TicketServiceForBooking;
@@ -12,6 +14,7 @@ import com.example.Event.Management.Platform.service.TicketServiceForController;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -31,6 +34,12 @@ public class TicketServiceImpl implements TicketServiceForController, TicketServ
 
         if (dto.availableQuantity() <= 0) {
             throw new RuntimeException("Quantity must be greater than 0");
+        }
+
+        Integer alreadyAllocated = ticketRepository.getNumberOfTicketsAlreadyAllocated(dto.eventId());
+
+        if (alreadyAllocated + dto.availableQuantity() > event.getMaxParticipants()){
+            throw new RuntimeException("Total tickets exceed event capacity of " + event.getMaxParticipants());
         }
 
         Ticket ticket = new Ticket();
@@ -68,6 +77,12 @@ public class TicketServiceImpl implements TicketServiceForController, TicketServ
             throw new RuntimeException("Quantity must be greater than 0");
         }
 
+        Integer alreadyAllocated = ticketRepository.getNumberOfTicketsAlreadyAllocated(update.eventId());
+
+        if ((alreadyAllocated - ticket.getAvailableQuantity())+ update.availableQuantity() > ticket.getEvent().getMaxParticipants()){
+            throw new RuntimeException("Total tickets exceed event capacity of " + ticket.getEvent().getMaxParticipants());
+        }
+
         ticket.setEvent(eventRepository.findById(update.eventId())
                 .orElseThrow(()->new RuntimeException("Event not found")));
         ticket.setType(update.type());
@@ -83,6 +98,13 @@ public class TicketServiceImpl implements TicketServiceForController, TicketServ
                 .orElseThrow(()-> new RuntimeException("Ticket not found"));
 
         ticketRepository.delete(ticket);
+    }
+
+    @Override
+    public List<String> getTicketTypes() {
+        return Arrays.stream(TicketType.values())
+                .map(Enum::name)
+                .toList();
     }
 
     @Override

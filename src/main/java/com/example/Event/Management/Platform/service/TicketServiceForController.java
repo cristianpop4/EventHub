@@ -2,6 +2,7 @@ package com.example.Event.Management.Platform.service;
 
 import com.example.Event.Management.Platform.model.dto.*;
 import com.example.Event.Management.Platform.model.entity.Ticket;
+import com.example.Event.Management.Platform.model.enums.TicketType;
 
 import java.util.List;
 
@@ -11,6 +12,7 @@ public interface TicketServiceForController {
     TicketResponseDto getTicketById(Long ticketId);
     TicketResponseDto updateTicket(Long ticketId, TicketUpdateDto update);
     void deleteTicketById(Long ticketId);
+    List<String> getTicketTypes();
 
     default TicketResponseDto toDto(Ticket ticket){
         return new TicketResponseDto(
