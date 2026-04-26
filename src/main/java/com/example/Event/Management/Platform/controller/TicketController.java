@@ -41,13 +41,13 @@ public class TicketController {
     }
 
     @Operation(summary = "Update ticket")
-    @PutMapping("/update/{ticketId}")
+    @PutMapping("/{ticketId}")
     public TicketResponseDto updateTicket(@PathVariable Long ticketId,@RequestBody TicketUpdateDto update){
         return ticketServiceForController.updateTicket(ticketId, update);
     }
 
     @Operation(summary = "Delete ticket")
-    @DeleteMapping("/delete/{ticketId}")
+    @DeleteMapping("/{ticketId}")
     public void deleteTicketById(@PathVariable Long ticketId){
         ticketServiceForController.deleteTicketById(ticketId);
     }

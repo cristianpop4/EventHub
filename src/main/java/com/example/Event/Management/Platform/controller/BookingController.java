@@ -47,25 +47,25 @@ public class BookingController {
     }
 
     @Operation(summary = "Get bookings by status")
-    @GetMapping("/statuses")
+    @GetMapping("/status")
     public List<BookingResponseDto> getBookingsByStatus(@RequestParam BookingStatus status){
         return bookingService.getBookingsByStatus(status);
     }
 
     @Operation(summary = "Get bookings by userId and status")
-    @GetMapping("/statuses/users/{userId}")
+    @GetMapping("/users/{userId}/status")
     public List<BookingResponseDto> getBookingsByUserIdAndStatus(@PathVariable Long userId,@RequestParam BookingStatus status){
         return bookingService.getBookingsByUserIdAndStatus(userId, status);
     }
 
     @Operation(summary = "Confirm booking")
-    @PutMapping("/confirmations/{bookingId}")
+    @PutMapping("/{bookingId}/confirm")
     public BookingResponseDto confirmBooking(@PathVariable Long bookingId){
         return bookingService.confirmBooking(bookingId);
     }
 
     @Operation(summary = "Cancel booking")
-    @PutMapping("/cancellations/{bookingId}")
+    @PutMapping("/{bookingId}/cancel")
     public void cancelBooking(@PathVariable Long bookingId){
         bookingService.cancelBooking(bookingId);
     }
