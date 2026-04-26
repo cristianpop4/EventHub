@@ -2,7 +2,7 @@ package com.example.Event.Management.Platform.It;
 
 import com.example.Event.Management.Platform.model.dto.UserRequestDto;
 import com.example.Event.Management.Platform.repository.UserRepository;
-import jakarta.transaction.Transactional;
+import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,9 +16,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -36,7 +36,7 @@ public class UserControllerIt {
     private ObjectMapper objectMapper;
 
     @AfterEach
-    void cleanUp(){
+    void cleanUp() {
         userRepository.deleteAll();
     }
 
@@ -49,11 +49,33 @@ public class UserControllerIt {
         );
 
         mockMvc.perform(post("/api/users")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(request)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username").value("user"))
                 .andExpect(jsonPath("$.email").value("user@gmail.com"));
 
+    }
+
+    @Test
+    void whenCreateInvalidUser_shouldReturnUser() throws Exception {
+        UserRequestDto request = new UserRequestDto(
+                "user",
+                "user@gmail.com",
+                "user123"
+        );
+
+        mockMvc.perform(post("/api/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
+
+        assertThrows(ServletException.class, () ->
+                mockMvc.perform(post("/api/users")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isOk()));
+
+        assertEquals(1, userRepository.findAll().size());
     }
 }
