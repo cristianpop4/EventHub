@@ -118,8 +118,8 @@ public class EventServiceImpl implements EventService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         return eventRepository.searchEvents(
-                        search.name(),
-                        search.city(),
+                        search.name() != null ? search.name().toLowerCase() : null,
+                        search.city() != null ? search.city().toLowerCase() : null,
                         search.eventCategory() != null ? search.eventCategory().name() : null,
                         search.dateTime() != null ? search.dateTime().format(formatter) : null,
                         LocalDateTime.now().format(formatter)

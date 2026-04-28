@@ -14,11 +14,11 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Query(
             value = "SELECT e.* FROM events e " +
                     "JOIN locations l ON l.id = e.location_id " +
-                    "WHERE (:name IS NULL OR LOWER(e.name) LIKE %:name%) AND " +
-                    "(:city IS NULL OR LOWER(l.city) LIKE %:city%) AND " +
-                    "(:category IS NULL OR e.event_category = :category) AND " +
-                    "(:date IS NULL OR e.date >= CAST(:date AS timestamp)) AND " +
-                    "e.date > CAST(:now AS timestamp)",
+                    "WHERE (:name IS NULL OR LOWER(e.name) LIKE CONCAT('%', LOWER(CAST(:name AS text)), '%')) AND " +
+                    "(:city IS NULL OR LOWER(l.city) LIKE CONCAT('%', LOWER(CAST(:city AS text)), '%')) AND " +
+                    "(:category IS NULL OR e.event_category = CAST(:category AS text)) AND " +
+                    "(:date IS NULL OR e.date >= TO_TIMESTAMP(CAST(:date AS text), 'YYYY-MM-DD HH24:MI:SS')) AND " +
+                    "e.date > TO_TIMESTAMP(:now, 'YYYY-MM-DD HH24:MI:SS')",
             nativeQuery = true
     )
     List<Event> searchEvents(
