@@ -8,6 +8,7 @@ import com.example.Event.Management.Platform.model.entity.Event;
 import com.example.Event.Management.Platform.model.entity.Location;
 import com.example.Event.Management.Platform.model.entity.Organizer;
 import com.example.Event.Management.Platform.model.enums.EventCategory;
+import com.example.Event.Management.Platform.model.exceptions.UserExceptions;
 import com.example.Event.Management.Platform.repository.EventRepository;
 import com.example.Event.Management.Platform.repository.OrganizerRepository;
 import com.example.Event.Management.Platform.service.EventService;
@@ -29,7 +30,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventResponseDto createEvent(EventRequestDto eventRequest) {
         Organizer organizer = organizerRepository.findById(eventRequest.organizerId())
-                .orElseThrow(() -> new RuntimeException("Organizer not found"));
+                .orElseThrow(() -> new UserExceptions.UserNotFoundException(eventRequest.organizerId()));
 
         Location location = locationService.getOrCreateLocation(eventRequest.location());
 
@@ -64,12 +65,12 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventResponseDto updateEvent(Long id, EventUpdateDto dto) {
         Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Organizer not found"));
+                .orElseThrow(() -> new RuntimeException("Event with id: " + id + " not found"));
 
         Location location = locationService.getOrCreateLocation(dto.location());
 
         Organizer organizer = organizerRepository.findById(dto.organizerId())
-                .orElseThrow(() -> new RuntimeException("Organizer not found"));
+                .orElseThrow(() -> new UserExceptions.UserNotFoundException(dto.organizerId()));
 
         event.setName(dto.name());
         event.setDescription(dto.description());
@@ -98,7 +99,7 @@ public class EventServiceImpl implements EventService {
         if (dto.maxParticipants() != null) event.setMaxParticipants(dto.maxParticipants());
         if (dto.organizerId() != null){
             Organizer organizer = organizerRepository.findById(dto.organizerId())
-                    .orElseThrow(() -> new RuntimeException("Organizer not found"));
+                    .orElseThrow(() -> new UserExceptions.UserNotFoundException(dto.organizerId()));
             event.setOrganizer(organizer);
         }
 

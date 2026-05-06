@@ -4,6 +4,7 @@ import com.example.Event.Management.Platform.model.dto.OrganizerRequestDto;
 import com.example.Event.Management.Platform.model.dto.OrganizerResponseDto;
 import com.example.Event.Management.Platform.model.dto.OrganizerUpdateDto;
 import com.example.Event.Management.Platform.model.entity.Organizer;
+import com.example.Event.Management.Platform.model.exceptions.UserExceptions;
 import com.example.Event.Management.Platform.repository.OrganizerRepository;
 import com.example.Event.Management.Platform.service.OrganizerService;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,7 @@ public class OrganizerServiceImpl implements OrganizerService {
     public OrganizerResponseDto createOrganizer(OrganizerRequestDto request) {
         repository.findByEmail(request.email())
                 .ifPresent(organizer -> {
-                    throw new RuntimeException("User with this email already exists");
+                    throw new UserExceptions.EmailAlreadyExistsException(request.email());
                 });
 
         Organizer organizer = Organizer.builder()
@@ -36,7 +37,7 @@ public class OrganizerServiceImpl implements OrganizerService {
     public OrganizerResponseDto getOrganizerById(Long id) {
         return toDto(
                 repository.findById(id)
-                        .orElseThrow(() -> new RuntimeException("Organizer not found"))
+                        .orElseThrow(() -> new UserExceptions.UserNotFoundException(id))
         );
     }
 
@@ -51,7 +52,7 @@ public class OrganizerServiceImpl implements OrganizerService {
     @Override
     public OrganizerResponseDto update(Long id,OrganizerUpdateDto updateDto){
         Organizer organizer = repository.findById(id)
-                .orElseThrow(()-> new RuntimeException("Organizer not found"));
+                .orElseThrow(()-> new UserExceptions.UserNotFoundException(id));
 
         organizer.setUsername(updateDto.username());
         organizer.setEmail(updateDto.email());
@@ -63,7 +64,7 @@ public class OrganizerServiceImpl implements OrganizerService {
     @Override
     public void deleteOrganizerById(Long id){
         Organizer organizer = repository.findById(id)
-                .orElseThrow(()-> new RuntimeException("Organizer not found"));
+                .orElseThrow(()-> new UserExceptions.UserNotFoundException(id));
 
         repository.delete(organizer);
     }

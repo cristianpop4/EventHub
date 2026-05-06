@@ -37,7 +37,7 @@ public class UserServiceImpl implements UserService {
     public UserResponseDto getUserById (Long id){
          return toDto(
                  repository.findById(id)
-                         .orElseThrow(()-> new RuntimeException("User not found"))
+                         .orElseThrow(()-> new UserExceptions.UserNotFoundException(id))
          );
     }
 
@@ -52,7 +52,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDto update(Long id, UserUpdateDto dto){
         User user = repository.findById(id)
-                .orElseThrow(()-> new RuntimeException("User not found"));
+                .orElseThrow(()-> new UserExceptions.UserNotFoundException(id));
 
         user.setUsername(dto.username());
         user.setEmail(dto.email());
@@ -64,7 +64,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUserById (Long id){
         User user = repository.findById(id)
-                        .orElseThrow(()-> new RuntimeException("User not found"));
+                        .orElseThrow(()-> new UserExceptions.UserNotFoundException(id));
 
         repository.delete(user);
     }

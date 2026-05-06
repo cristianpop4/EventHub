@@ -7,6 +7,7 @@ import com.example.Event.Management.Platform.model.entity.Event;
 import com.example.Event.Management.Platform.model.entity.Ticket;
 import com.example.Event.Management.Platform.model.entity.User;
 import com.example.Event.Management.Platform.model.enums.BookingStatus;
+import com.example.Event.Management.Platform.model.exceptions.UserExceptions;
 import com.example.Event.Management.Platform.repository.BookingRepository;
 import com.example.Event.Management.Platform.repository.EventRepository;
 import com.example.Event.Management.Platform.repository.TicketRepository;
@@ -31,7 +32,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingResponseDto createBooking(BookingRequestDto requestDto) {
         User user = userRepository.findById(requestDto.userId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserExceptions.UserNotFoundException(requestDto.userId()));
 
         Event event = eventRepository.findById(requestDto.eventId())
                 .orElseThrow(() -> new RuntimeException("Event not found"));

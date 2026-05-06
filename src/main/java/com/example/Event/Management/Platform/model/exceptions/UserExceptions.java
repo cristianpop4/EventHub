@@ -11,4 +11,11 @@ public class UserExceptions {
             super("Email already exists: " + email);
         }
     }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public static class UserNotFoundException extends RuntimeException{
+        public UserNotFoundException(Long id){
+            super("User with id: " + id + " not found");
+        }
+    }
 }
