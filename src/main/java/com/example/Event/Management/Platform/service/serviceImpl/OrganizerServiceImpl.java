@@ -37,7 +37,7 @@ public class OrganizerServiceImpl implements OrganizerService {
     public OrganizerResponseDto getOrganizerById(Long id) {
         return toDto(
                 repository.findById(id)
-                        .orElseThrow(() -> new UserExceptions.UserNotFoundException(id))
+                        .orElseThrow(() -> new UserExceptions.NotFoundException(id))
         );
     }
 
@@ -52,7 +52,7 @@ public class OrganizerServiceImpl implements OrganizerService {
     @Override
     public OrganizerResponseDto update(Long id,OrganizerUpdateDto updateDto){
         Organizer organizer = repository.findById(id)
-                .orElseThrow(()-> new UserExceptions.UserNotFoundException(id));
+                .orElseThrow(()-> new UserExceptions.NotFoundException(id));
 
         organizer.setUsername(updateDto.username());
         organizer.setEmail(updateDto.email());
@@ -64,7 +64,7 @@ public class OrganizerServiceImpl implements OrganizerService {
     @Override
     public void deleteOrganizerById(Long id){
         Organizer organizer = repository.findById(id)
-                .orElseThrow(()-> new UserExceptions.UserNotFoundException(id));
+                .orElseThrow(()-> new UserExceptions.NotFoundException(id));
 
         repository.delete(organizer);
     }

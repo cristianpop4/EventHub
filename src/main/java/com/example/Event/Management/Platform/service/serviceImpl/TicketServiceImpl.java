@@ -5,13 +5,15 @@ import com.example.Event.Management.Platform.model.dto.TicketResponseDto;
 import com.example.Event.Management.Platform.model.dto.TicketUpdateDto;
 import com.example.Event.Management.Platform.model.entity.Event;
 import com.example.Event.Management.Platform.model.entity.Ticket;
-import com.example.Event.Management.Platform.model.enums.EventCategory;
 import com.example.Event.Management.Platform.model.enums.TicketType;
+import com.example.Event.Management.Platform.model.exceptions.EventExceptions;
+import com.example.Event.Management.Platform.model.exceptions.TicketExceptions;
 import com.example.Event.Management.Platform.repository.EventRepository;
 import com.example.Event.Management.Platform.repository.TicketRepository;
 import com.example.Event.Management.Platform.service.TicketServiceForBooking;
 import com.example.Event.Management.Platform.service.TicketServiceForController;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -26,20 +28,26 @@ public class TicketServiceImpl implements TicketServiceForController, TicketServ
     @Override
     public TicketResponseDto createTicket(TicketRequestDto dto) {
         Event event = eventRepository.findById(dto.eventId())
-                .orElseThrow(()-> new RuntimeException("Event not found"));
+                .orElseThrow(() -> new EventExceptions.NotFoundExceptions(dto.eventId()));
 
         if (dto.price() < 0) {
-            throw new RuntimeException("Price must be positive");
+            throw new TicketExceptions.InvalidDataException("price", "must be positive");
         }
 
         if (dto.availableQuantity() <= 0) {
-            throw new RuntimeException("Quantity must be greater than 0");
+            throw new TicketExceptions.InvalidDataException("available quantity", "must be greater than 0");
         }
 
-        Integer alreadyAllocated = ticketRepository.getNumberOfTicketsAlreadyAllocated(dto.eventId());
+        Integer alreadyAllocated;
 
-        if (alreadyAllocated + dto.availableQuantity() > event.getMaxParticipants()){
-            throw new RuntimeException("Total tickets exceed event capacity of " + event.getMaxParticipants());
+        try {
+            alreadyAllocated = ticketRepository.getNumberOfTicketsAlreadyAllocated(dto.eventId());
+        } catch (DataAccessException e) {
+            throw new TicketExceptions.DataAccessException(dto.eventId());
+        }
+
+        if (alreadyAllocated + dto.availableQuantity() > event.getMaxParticipants()) {
+            throw new TicketExceptions.CapacityExceededException(event.getMaxParticipants());
         }
 
         Ticket ticket = new Ticket();
@@ -53,6 +61,8 @@ public class TicketServiceImpl implements TicketServiceForController, TicketServ
 
     @Override
     public List<TicketResponseDto> getTicketsByEventId(Long eventId) {
+        eventRepository.findById(eventId)
+                .orElseThrow(() -> new EventExceptions.NotFoundExceptions(eventId));
         return ticketRepository.findByEventId(eventId)
                 .stream().map(this::toDto)
                 .toList();
@@ -61,30 +71,38 @@ public class TicketServiceImpl implements TicketServiceForController, TicketServ
     @Override
     public TicketResponseDto getTicketById(Long ticketId) {
         return toDto(ticketRepository.findById(ticketId)
-                .orElseThrow(()-> new RuntimeException("Ticket not found")));
+                .orElseThrow(() -> new TicketExceptions.NotFoundException(ticketId)));
     }
 
     @Override
     public TicketResponseDto updateTicket(Long ticketId, TicketUpdateDto update) {
         Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(()-> new RuntimeException("Ticket not found"));
+                .orElseThrow(() -> new TicketExceptions.NotFoundException(ticketId));
+
+        Event event = eventRepository.findById(update.eventId())
+                .orElseThrow(() -> new EventExceptions.NotFoundExceptions(update.eventId()));
 
         if (update.price() < 0) {
-            throw new RuntimeException("Price must be positive");
+            throw new TicketExceptions.InvalidDataException("price", "must be positive");
         }
 
         if (update.availableQuantity() <= 0) {
-            throw new RuntimeException("Quantity must be greater than 0");
+            throw new TicketExceptions.InvalidDataException("available quantity", "must be greater than 0");
         }
 
-        Integer alreadyAllocated = ticketRepository.getNumberOfTicketsAlreadyAllocated(update.eventId());
+        Integer alreadyAllocated;
 
-        if ((alreadyAllocated - ticket.getAvailableQuantity())+ update.availableQuantity() > ticket.getEvent().getMaxParticipants()){
-            throw new RuntimeException("Total tickets exceed event capacity of " + ticket.getEvent().getMaxParticipants());
+        try {
+            alreadyAllocated = ticketRepository.getNumberOfTicketsAlreadyAllocated(update.eventId());
+        } catch (DataAccessException e) {
+            throw new TicketExceptions.DataAccessException(update.eventId());
         }
 
-        ticket.setEvent(eventRepository.findById(update.eventId())
-                .orElseThrow(()->new RuntimeException("Event not found")));
+        if ((alreadyAllocated - ticket.getAvailableQuantity()) + update.availableQuantity() > event.getMaxParticipants()) {
+            throw new TicketExceptions.CapacityExceededException(event.getMaxParticipants());
+        }
+
+        ticket.setEvent(event);
         ticket.setType(update.type());
         ticket.setPrice(update.price());
         ticket.setAvailableQuantity(update.availableQuantity());
@@ -95,7 +113,7 @@ public class TicketServiceImpl implements TicketServiceForController, TicketServ
     @Override
     public void deleteTicketById(Long ticketId) {
         Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(()-> new RuntimeException("Ticket not found"));
+                .orElseThrow(() -> new TicketExceptions.NotFoundException(ticketId));
 
         ticketRepository.delete(ticket);
     }
@@ -110,7 +128,7 @@ public class TicketServiceImpl implements TicketServiceForController, TicketServ
     @Override
     public boolean checkAvailability(Long ticketId) {
         Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(()-> new RuntimeException("Ticket not found"));
+                .orElseThrow(() -> new TicketExceptions.NotFoundException(ticketId));
 
         return ticket.getAvailableQuantity() >= 1;
     }
@@ -118,10 +136,10 @@ public class TicketServiceImpl implements TicketServiceForController, TicketServ
     @Override
     public void decreaseAvailability(Long ticketId) {
         Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(()-> new RuntimeException("Ticket not found"));
+                .orElseThrow(() -> new TicketExceptions.NotFoundException(ticketId));
 
         if (ticket.getAvailableQuantity() < 1) {
-            throw new RuntimeException("Not enough tickets available");
+            throw new TicketExceptions.NotAvailableException(ticketId);
         }
 
         ticket.setAvailableQuantity(ticket.getAvailableQuantity() - 1);
@@ -132,7 +150,7 @@ public class TicketServiceImpl implements TicketServiceForController, TicketServ
     @Override
     public void increaseAvailability(Long ticketId) {
         Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(()-> new RuntimeException("Ticket not found"));
+                .orElseThrow(() -> new TicketExceptions.NotFoundException(ticketId));
 
         ticket.setAvailableQuantity(ticket.getAvailableQuantity() + 1);
 

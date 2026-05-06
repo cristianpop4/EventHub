@@ -8,6 +8,7 @@ import com.example.Event.Management.Platform.model.entity.Event;
 import com.example.Event.Management.Platform.model.entity.Location;
 import com.example.Event.Management.Platform.model.entity.Organizer;
 import com.example.Event.Management.Platform.model.enums.EventCategory;
+import com.example.Event.Management.Platform.model.exceptions.EventExceptions;
 import com.example.Event.Management.Platform.model.exceptions.UserExceptions;
 import com.example.Event.Management.Platform.repository.EventRepository;
 import com.example.Event.Management.Platform.repository.OrganizerRepository;
@@ -30,7 +31,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventResponseDto createEvent(EventRequestDto eventRequest) {
         Organizer organizer = organizerRepository.findById(eventRequest.organizerId())
-                .orElseThrow(() -> new UserExceptions.UserNotFoundException(eventRequest.organizerId()));
+                .orElseThrow(() -> new UserExceptions.NotFoundException(eventRequest.organizerId()));
 
         Location location = locationService.getOrCreateLocation(eventRequest.location());
 
@@ -58,19 +59,19 @@ public class EventServiceImpl implements EventService {
     public EventResponseDto getEventById(Long id) {
         return toDto(
                 eventRepository.findById(id)
-                        .orElseThrow(() -> new RuntimeException("Event with id: " + id + " not found"))
+                        .orElseThrow(() -> new EventExceptions.NotFoundExceptions(id))
         );
     }
 
     @Override
     public EventResponseDto updateEvent(Long id, EventUpdateDto dto) {
         Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Event with id: " + id + " not found"));
+                .orElseThrow(() -> new EventExceptions.NotFoundExceptions(id));
 
         Location location = locationService.getOrCreateLocation(dto.location());
 
         Organizer organizer = organizerRepository.findById(dto.organizerId())
-                .orElseThrow(() -> new UserExceptions.UserNotFoundException(dto.organizerId()));
+                .orElseThrow(() -> new UserExceptions.NotFoundException(dto.organizerId()));
 
         event.setName(dto.name());
         event.setDescription(dto.description());
@@ -86,7 +87,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventResponseDto partialUpdateEvent(Long id, EventUpdateDto dto) {
         Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Event not found"));
+                .orElseThrow(() -> new EventExceptions.NotFoundExceptions(id));
 
         if (dto.name() != null) event.setName(dto.name());
         if (dto.description() != null) event.setDescription(dto.description());
@@ -99,7 +100,7 @@ public class EventServiceImpl implements EventService {
         if (dto.maxParticipants() != null) event.setMaxParticipants(dto.maxParticipants());
         if (dto.organizerId() != null){
             Organizer organizer = organizerRepository.findById(dto.organizerId())
-                    .orElseThrow(() -> new UserExceptions.UserNotFoundException(dto.organizerId()));
+                    .orElseThrow(() -> new UserExceptions.NotFoundException(dto.organizerId()));
             event.setOrganizer(organizer);
         }
 
@@ -109,7 +110,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public void deleteEventById(Long id) {
         Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Event not found"));
+                .orElseThrow(() -> new EventExceptions.NotFoundExceptions(id));
 
         eventRepository.delete(event);
     }

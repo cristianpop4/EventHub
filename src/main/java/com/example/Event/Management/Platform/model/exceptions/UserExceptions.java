@@ -13,8 +13,8 @@ public class UserExceptions {
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public static class UserNotFoundException extends RuntimeException{
-        public UserNotFoundException(Long id){
+    public static class NotFoundException extends RuntimeException{
+        public NotFoundException(Long id){
             super("User with id: " + id + " not found");
         }
     }

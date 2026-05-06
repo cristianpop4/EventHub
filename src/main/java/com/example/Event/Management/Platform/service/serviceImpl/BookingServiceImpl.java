@@ -7,6 +7,9 @@ import com.example.Event.Management.Platform.model.entity.Event;
 import com.example.Event.Management.Platform.model.entity.Ticket;
 import com.example.Event.Management.Platform.model.entity.User;
 import com.example.Event.Management.Platform.model.enums.BookingStatus;
+import com.example.Event.Management.Platform.model.exceptions.BookingExceptions;
+import com.example.Event.Management.Platform.model.exceptions.EventExceptions;
+import com.example.Event.Management.Platform.model.exceptions.TicketExceptions;
 import com.example.Event.Management.Platform.model.exceptions.UserExceptions;
 import com.example.Event.Management.Platform.repository.BookingRepository;
 import com.example.Event.Management.Platform.repository.EventRepository;
@@ -32,16 +35,16 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingResponseDto createBooking(BookingRequestDto requestDto) {
         User user = userRepository.findById(requestDto.userId())
-                .orElseThrow(() -> new UserExceptions.UserNotFoundException(requestDto.userId()));
+                .orElseThrow(() -> new UserExceptions.NotFoundException(requestDto.userId()));
 
         Event event = eventRepository.findById(requestDto.eventId())
-                .orElseThrow(() -> new RuntimeException("Event not found"));
+                .orElseThrow(() -> new EventExceptions.NotFoundExceptions(requestDto.eventId()));
 
         Ticket ticket = ticketRepository.findById(requestDto.ticketId())
-                .orElseThrow(() -> new RuntimeException("Ticket not found"));
+                .orElseThrow(() -> new TicketExceptions.NotFoundException(requestDto.ticketId()));
 
         if (!ticketService.checkAvailability(requestDto.ticketId())) {
-            throw new RuntimeException("There are no more tickets available");
+            throw new TicketExceptions.NotAvailableException(requestDto.ticketId());
         }
 
         Booking booking = new Booking();
@@ -57,10 +60,11 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingResponseDto confirmBooking(Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new RuntimeException("Booking not found"));
+                .orElseThrow(() -> new BookingExceptions.NotFoundException(bookingId));
 
         if (booking.getStatus() != BookingStatus.ON_HOLD) {
-            throw new RuntimeException("Booking status already changed or cannot be confirm");
+            throw new BookingExceptions.StatusConflictException("confirm", booking.getId(),
+                    booking.getStatus(), List.of(BookingStatus.ON_HOLD));
         }
 
         booking.setStatus(BookingStatus.CONFIRMED);
@@ -72,14 +76,18 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public void cancelBooking(Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new RuntimeException("Booking not found"));
+                .orElseThrow(() -> new BookingExceptions.NotFoundException(bookingId));
 
         if (booking.getStatus() != BookingStatus.ON_HOLD && booking.getStatus() != BookingStatus.CONFIRMED) {
-            throw new RuntimeException("Booking status already changed or cannot be canceled");
+            throw new BookingExceptions.StatusConflictException("cancel", bookingId, booking.getStatus(), List.of(BookingStatus.ON_HOLD, BookingStatus.CONFIRMED));
         }
 
+        BookingStatus previousStatus = booking.getStatus();
         booking.setStatus(BookingStatus.CANCELED);
-        ticketService.increaseAvailability(booking.getTicket().getId());
+
+        if (previousStatus == BookingStatus.CONFIRMED) {
+            ticketService.increaseAvailability(booking.getTicket().getId());
+        }
 
         bookingRepository.save(booking);
     }
@@ -87,7 +95,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingResponseDto getBookingById(Long bookingId) {
         return toDto(bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new RuntimeException("Booking not found")));
+                .orElseThrow(() -> new BookingExceptions.NotFoundException(bookingId)));
     }
 
     @Override
@@ -100,6 +108,8 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingResponseDto> getBookingsByUserId(Long userId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new UserExceptions.NotFoundException(userId));
         return bookingRepository.findAllByUserId(userId)
                 .stream()
                 .map(this::toDto)
@@ -108,6 +118,8 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingResponseDto> getBookingsByEventId(Long eventId) {
+        eventRepository.findById(eventId)
+                .orElseThrow(() -> new EventExceptions.NotFoundExceptions(eventId));
         return bookingRepository.findAllByEventId(eventId)
                 .stream()
                 .map(this::toDto)
@@ -124,6 +136,8 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingResponseDto> getBookingsByUserIdAndStatus(Long userId, BookingStatus status) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new UserExceptions.NotFoundException(userId));
         return bookingRepository.findAllByUserIdAndStatus(userId, status)
                 .stream()
                 .map(this::toDto)
