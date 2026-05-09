@@ -18,6 +18,7 @@ import com.example.Event.Management.Platform.repository.UserRepository;
 import com.example.Event.Management.Platform.service.BookingService;
 import com.example.Event.Management.Platform.service.TicketServiceForBooking;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -34,8 +35,12 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingResponseDto createBooking(BookingRequestDto requestDto) {
-        User user = userRepository.findById(requestDto.userId())
-                .orElseThrow(() -> new UserExceptions.NotFoundException(requestDto.userId()));
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserExceptions.NotFoundException(0L));
 
         Event event = eventRepository.findById(requestDto.eventId())
                 .orElseThrow(() -> new EventExceptions.NotFoundExceptions(requestDto.eventId()));

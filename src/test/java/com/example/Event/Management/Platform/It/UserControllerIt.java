@@ -1,6 +1,6 @@
 package com.example.Event.Management.Platform.It;
 
-import com.example.Event.Management.Platform.model.dto.UserRequestDto;
+import com.example.Event.Management.Platform.model.dto.RegisterRequest;
 import com.example.Event.Management.Platform.repository.UserRepository;
 import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.AfterEach;
@@ -42,7 +42,7 @@ public class UserControllerIt {
 
     @Test
     void whenCreateValidUser_shouldReturnUser() throws Exception {
-        UserRequestDto request = new UserRequestDto(
+        RegisterRequest request = new RegisterRequest(
                 "user",
                 "user@gmail.com",
                 "user123"
@@ -59,7 +59,7 @@ public class UserControllerIt {
 
     @Test
     void whenCreateInvalidUser_shouldReturnUser() throws Exception {
-        UserRequestDto request = new UserRequestDto(
+        RegisterRequest request = new RegisterRequest(
                 "user",
                 "user@gmail.com",
                 "user123"

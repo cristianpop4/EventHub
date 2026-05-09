@@ -29,7 +29,7 @@ public interface EventService {
                 ),
                 event.getDate(),
                 event.getMaxParticipants(),
-                event.getOrganizer().getUsername()
+                event.getUser().getName()
         );
     }
 }

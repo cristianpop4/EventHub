@@ -20,7 +20,7 @@ public interface BookingService {
     default BookingResponseDto toDto(Booking booking){
         return new BookingResponseDto(
                 booking.getId(),
-                booking.getUser().getUsername(),
+                booking.getUser().getName(),
                 new EventSummaryDto(
                         booking.getEvent().getId(),
                         booking.getEvent().getName(),

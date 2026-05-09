@@ -1,49 +1,59 @@
 package com.example.Event.Management.Platform.controller;
 
-import com.example.Event.Management.Platform.model.dto.UserRequestDto;
+import com.example.Event.Management.Platform.model.dto.RegisterRequest;
 import com.example.Event.Management.Platform.model.dto.UserResponseDto;
-import com.example.Event.Management.Platform.model.dto.UserUpdateDto;
-import com.example.Event.Management.Platform.service.UserService;
-import io.swagger.v3.oas.annotations.Operation;
+import com.example.Event.Management.Platform.model.entity.User;
+import com.example.Event.Management.Platform.model.enums.Role;
+import com.example.Event.Management.Platform.model.exceptions.UserExceptions;
+import com.example.Event.Management.Platform.repository.UserRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.security.Principal;
 
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
-    private final UserService service;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    @Operation(summary = "Save user in DB")
-    @PostMapping
-    public UserResponseDto createUser(@RequestBody UserRequestDto dto) {
-        return service.createUser(dto);
+    @PostMapping("/register")
+    public ResponseEntity<UserResponseDto> register(@Valid @RequestBody RegisterRequest request){
+        if (userRepository.findByEmail(request.email()).isPresent()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        User user = new User();
+        user.setName(request.username());
+        user.setEmail(request.email());
+        user.setPassword(request.password());
+        user.setRole(Role.ROLE_USER);
+
+        User saved = userRepository.save(user);
+
+        return ResponseEntity.ok(
+                new UserResponseDto(
+                        saved.getId(),
+                        saved.getName(),
+                        saved.getEmail(),
+                        saved.getRole().name()
+                )
+        );
     }
 
-    @Operation(summary = "Get user by id")
-    @GetMapping("/{id}")
-    public UserResponseDto getUserById(@PathVariable Long id) {
-        return service.getUserById(id);
-    }
+    @GetMapping("/me")
+    public UserResponseDto me(Principal principal){
+        User user = userRepository.findByEmail(principal.getName()).orElseThrow();
 
-    @Operation(summary = "Get all users")
-    @GetMapping
-    public List<UserResponseDto> getAllUsers(){
-        return service.getAllUsers();
+        return new UserResponseDto(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getRole().name()
+        );
     }
-
-    @Operation(summary = "Update user")
-    @PutMapping("/{id}")
-    public UserResponseDto update(@PathVariable Long id, @RequestBody UserUpdateDto dto){
-        return service.update(id, dto);
-    }
-
-    @Operation(summary = "Delete user")
-    @DeleteMapping("/{id}")
-    public void deleteUserById (@PathVariable Long id){
-        service.deleteUserById(id);
-    }
-
 }

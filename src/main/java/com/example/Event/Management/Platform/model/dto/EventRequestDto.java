@@ -12,6 +12,5 @@ public record EventRequestDto(
     LocationRequestDto location,
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     LocalDateTime date,
-    Integer maxParticipants,
-    Long organizerId
+    Integer maxParticipants
 ) { }

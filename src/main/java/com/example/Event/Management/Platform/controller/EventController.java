@@ -54,7 +54,7 @@ public class EventController {
     }
 
     @Operation(summary = "Search event")
-    @GetMapping
+    @GetMapping("/search")
     public List<EventResponseDto> searchEvents(EventSearchDto search){
         return eventService.searchEvents(search);
     }
