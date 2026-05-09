@@ -6,14 +6,16 @@ import com.example.Event.Management.Platform.model.dto.EventSearchDto;
 import com.example.Event.Management.Platform.model.dto.EventUpdateDto;
 import com.example.Event.Management.Platform.model.entity.Event;
 import com.example.Event.Management.Platform.model.entity.Location;
-import com.example.Event.Management.Platform.model.entity.Organizer;
+import com.example.Event.Management.Platform.model.entity.User;
 import com.example.Event.Management.Platform.model.enums.EventCategory;
 import com.example.Event.Management.Platform.model.exceptions.EventExceptions;
 import com.example.Event.Management.Platform.model.exceptions.UserExceptions;
 import com.example.Event.Management.Platform.repository.EventRepository;
-import com.example.Event.Management.Platform.repository.OrganizerRepository;
+import com.example.Event.Management.Platform.repository.UserRepository;
 import com.example.Event.Management.Platform.service.EventService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -26,12 +28,16 @@ import java.util.List;
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final LocationServiceImpl locationService;
-    private final OrganizerRepository organizerRepository;
+    private final UserRepository userRepository;
 
     @Override
     public EventResponseDto createEvent(EventRequestDto eventRequest) {
-        Organizer organizer = organizerRepository.findById(eventRequest.organizerId())
-                .orElseThrow(() -> new UserExceptions.NotFoundException(eventRequest.organizerId()));
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         Location location = locationService.getOrCreateLocation(eventRequest.location());
 
@@ -42,7 +48,7 @@ public class EventServiceImpl implements EventService {
                 .location(location)
                 .date(eventRequest.date())
                 .maxParticipants(eventRequest.maxParticipants())
-                .organizer(organizer)
+                .user(user)
                 .build();
 
         return toDto(eventRepository.save(event));
@@ -70,16 +76,12 @@ public class EventServiceImpl implements EventService {
 
         Location location = locationService.getOrCreateLocation(dto.location());
 
-        Organizer organizer = organizerRepository.findById(dto.organizerId())
-                .orElseThrow(() -> new UserExceptions.NotFoundException(dto.organizerId()));
-
         event.setName(dto.name());
         event.setDescription(dto.description());
         event.setEventCategory(dto.eventCategory());
         event.setLocation(location);
         event.setDate(dto.date());
         event.setMaxParticipants(dto.maxParticipants());
-        event.setOrganizer(organizer);
 
         return toDto(eventRepository.save(event));
     }
@@ -98,11 +100,6 @@ public class EventServiceImpl implements EventService {
         }
         if (dto.date() != null) event.setDate(dto.date());
         if (dto.maxParticipants() != null) event.setMaxParticipants(dto.maxParticipants());
-        if (dto.organizerId() != null){
-            Organizer organizer = organizerRepository.findById(dto.organizerId())
-                    .orElseThrow(() -> new UserExceptions.NotFoundException(dto.organizerId()));
-            event.setOrganizer(organizer);
-        }
 
         return toDto(eventRepository.save(event));
     }

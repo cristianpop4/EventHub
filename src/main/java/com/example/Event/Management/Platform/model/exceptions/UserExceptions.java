@@ -1,6 +1,7 @@
 package com.example.Event.Management.Platform.model.exceptions;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 public class UserExceptions {
@@ -15,7 +16,7 @@ public class UserExceptions {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public static class NotFoundException extends RuntimeException{
         public NotFoundException(Long id){
-            super("User with id: " + id + " not found");
+            super("User not found");
         }
     }
 }

@@ -1,23 +1,28 @@
 package com.example.Event.Management.Platform.model.entity;
 
+import com.example.Event.Management.Platform.model.enums.Role;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
-import java.util.List;
-
-@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "users")
 @Data
-@SuperBuilder
 @NoArgsConstructor
-@PrimaryKeyJoinColumn(name = "user_id")
-public class User extends Person{
+@AllArgsConstructor
+public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Booking> booking;
+    private String name;
+
+    @Column(unique = true)
+    private String email;
+
+    private String password;
+
+    @Enumerated(EnumType.STRING)
+    private Role role = Role.ROLE_USER;
 }
-

@@ -5,6 +5,8 @@ import com.example.Event.Management.Platform.model.dto.TicketResponseDto;
 import com.example.Event.Management.Platform.model.dto.TicketUpdateDto;
 import com.example.Event.Management.Platform.model.entity.Event;
 import com.example.Event.Management.Platform.model.entity.Ticket;
+import com.example.Event.Management.Platform.model.entity.User;
+import com.example.Event.Management.Platform.model.enums.Role;
 import com.example.Event.Management.Platform.model.enums.TicketType;
 import com.example.Event.Management.Platform.model.exceptions.EventExceptions;
 import com.example.Event.Management.Platform.model.exceptions.TicketExceptions;
@@ -14,8 +16,11 @@ import com.example.Event.Management.Platform.service.TicketServiceForBooking;
 import com.example.Event.Management.Platform.service.TicketServiceForController;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.nio.file.AccessDeniedException;
 import java.util.Arrays;
 import java.util.List;
 

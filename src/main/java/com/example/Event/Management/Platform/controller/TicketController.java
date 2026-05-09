@@ -6,6 +6,7 @@ import com.example.Event.Management.Platform.model.dto.TicketUpdateDto;
 import com.example.Event.Management.Platform.service.TicketServiceForController;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,6 +19,7 @@ public class TicketController {
 
     @Operation(summary = "Create ticket")
     @PostMapping
+    @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
     public TicketResponseDto createTicket(@RequestBody TicketRequestDto dto){
         return ticketServiceForController.createTicket(dto);
     }
@@ -36,18 +38,21 @@ public class TicketController {
 
     @Operation(summary = "Get tickets by id")
     @GetMapping("/{ticketId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public TicketResponseDto getTicketById(@PathVariable Long ticketId){
         return ticketServiceForController.getTicketById(ticketId);
     }
 
     @Operation(summary = "Update ticket")
     @PutMapping("/{ticketId}")
+    @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
     public TicketResponseDto updateTicket(@PathVariable Long ticketId,@RequestBody TicketUpdateDto update){
         return ticketServiceForController.updateTicket(ticketId, update);
     }
 
     @Operation(summary = "Delete ticket")
     @DeleteMapping("/{ticketId}")
+    @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
     public void deleteTicketById(@PathVariable Long ticketId){
         ticketServiceForController.deleteTicketById(ticketId);
     }

@@ -58,15 +58,15 @@ public class BookingController {
         return bookingService.getBookingsByUserIdAndStatus(userId, status);
     }
 
-    @Operation(summary = "Confirm booking")
-    @PutMapping("/{bookingId}/confirm")
-    public BookingResponseDto confirmBooking(@PathVariable Long bookingId){
-        return bookingService.confirmBooking(bookingId);
-    }
+        @Operation(summary = "Confirm booking")
+        @PutMapping("/{bookingId}/confirm")
+        public BookingResponseDto confirmBooking(@PathVariable Long bookingId){
+            return bookingService.confirmBooking(bookingId);
+        }
 
-    @Operation(summary = "Cancel booking")
-    @PutMapping("/{bookingId}/cancel")
-    public void cancelBooking(@PathVariable Long bookingId){
-        bookingService.cancelBooking(bookingId);
-    }
+        @Operation(summary = "Cancel booking")
+        @PutMapping("/{bookingId}/cancel")
+        public void cancelBooking(@PathVariable Long bookingId){
+            bookingService.cancelBooking(bookingId);
+        }
 }
