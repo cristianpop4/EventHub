@@ -33,6 +33,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/tickets/types").permitAll()
 
                         .requestMatchers(HttpMethod.GET, "/api/users/me").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/users/me").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/users/me").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/bookings").hasRole("USER")
                         .requestMatchers(HttpMethod.GET, "/api/bookings/{bookingId}").hasAnyRole("USER", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/bookings/users/**").hasAnyRole("USER", "ADMIN")
@@ -48,6 +50,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/tickets/**").hasAnyRole("ORGANIZER", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/bookings/events/**").hasAnyRole("ORGANIZER", "ADMIN")
 
+                        .requestMatchers(HttpMethod.GET, "/api/users").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/users/{id}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/users/{id}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/users/{id}/role").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/bookings").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/bookings/status").hasRole("ADMIN")
 

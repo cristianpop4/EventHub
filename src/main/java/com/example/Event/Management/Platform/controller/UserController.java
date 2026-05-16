@@ -2,58 +2,62 @@ package com.example.Event.Management.Platform.controller;
 
 import com.example.Event.Management.Platform.model.dto.RegisterRequest;
 import com.example.Event.Management.Platform.model.dto.UserResponseDto;
-import com.example.Event.Management.Platform.model.entity.User;
+import com.example.Event.Management.Platform.model.dto.UserUpdateDto;
 import com.example.Event.Management.Platform.model.enums.Role;
-import com.example.Event.Management.Platform.model.exceptions.UserExceptions;
-import com.example.Event.Management.Platform.repository.UserRepository;
+import com.example.Event.Management.Platform.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponseDto> register(@Valid @RequestBody RegisterRequest request){
-        if (userRepository.findByEmail(request.email()).isPresent()) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        User user = new User();
-        user.setName(request.username());
-        user.setEmail(request.email());
-        user.setPassword(request.password());
-        user.setRole(Role.ROLE_USER);
-
-        User saved = userRepository.save(user);
-
-        return ResponseEntity.ok(
-                new UserResponseDto(
-                        saved.getId(),
-                        saved.getName(),
-                        saved.getEmail(),
-                        saved.getRole().name()
-                )
-        );
+    public ResponseEntity<UserResponseDto> register(@Valid @RequestBody RegisterRequest request) {
+        return ResponseEntity.ok(userService.register(request));
     }
 
     @GetMapping("/me")
-    public UserResponseDto me(Principal principal){
-        User user = userRepository.findByEmail(principal.getName()).orElseThrow();
+    public UserResponseDto me(Principal principal) {
+        return userService.getMe(principal.getName());
+    }
 
-        return new UserResponseDto(
-                user.getId(),
-                user.getName(),
-                user.getEmail(),
-                user.getRole().name()
-        );
+    @PutMapping("/me")
+    public UserResponseDto updateMe(Principal principal, @Valid @RequestBody UserUpdateDto update) {
+        return userService.updateMe(principal.getName(), update);
+    }
+
+    @DeleteMapping("/me")
+    public ResponseEntity<Void> deleteMe(Principal principal) {
+        userService.deleteMe(principal.getName());
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping
+    public List<UserResponseDto> getAllUsers(){
+        return userService.getAllUsers();
+    }
+
+    @GetMapping("/{id}")
+    public UserResponseDto getUserById(@PathVariable Long id){
+        return userService.getUserById(id);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUserById(@PathVariable Long id){
+        userService.deleteUserById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/role")
+    public UserResponseDto changeRole(@PathVariable Long id, @RequestParam Role role){
+        return userService.changeRole(id, role);
     }
 }

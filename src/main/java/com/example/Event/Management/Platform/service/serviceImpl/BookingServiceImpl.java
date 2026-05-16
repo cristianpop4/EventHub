@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -35,8 +36,8 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingResponseDto createBooking(BookingRequestDto requestDto) {
-        String email = SecurityContextHolder.getContext()
-                .getAuthentication()
+        String email = Objects.requireNonNull(SecurityContextHolder.getContext()
+                        .getAuthentication())
                 .getName();
 
         User user = userRepository.findByEmail(email)
