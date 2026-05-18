@@ -19,6 +19,7 @@ import com.example.Event.Management.Platform.service.BookingService;
 import com.example.Event.Management.Platform.service.TicketServiceForBooking;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -41,7 +42,7 @@ public class BookingServiceImpl implements BookingService {
                 .getName();
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserExceptions.NotFoundException(0L));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         Event event = eventRepository.findById(requestDto.eventId())
                 .orElseThrow(() -> new EventExceptions.NotFoundExceptions(requestDto.eventId()));

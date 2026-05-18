@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -32,8 +33,8 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventResponseDto createEvent(EventRequestDto eventRequest) {
-        String email = SecurityContextHolder.getContext()
-                .getAuthentication()
+        String email = Objects.requireNonNull(SecurityContextHolder.getContext()
+                        .getAuthentication())
                 .getName();
 
         User user = userRepository.findByEmail(email)

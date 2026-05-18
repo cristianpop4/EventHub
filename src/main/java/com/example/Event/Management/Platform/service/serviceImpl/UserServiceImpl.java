@@ -9,7 +9,7 @@ import com.example.Event.Management.Platform.model.exceptions.UserExceptions;
 import com.example.Event.Management.Platform.repository.UserRepository;
 import com.example.Event.Management.Platform.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -23,9 +23,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto register(RegisterRequest request) {
-        User user = userRepository.findByEmail(request.email())
-                .orElseThrow(()-> new UserExceptions.EmailAlreadyExistsException(request.email()));
+        if (userRepository.findByEmail(request.email()).isPresent()) {
+            throw new UserExceptions.EmailAlreadyExistsException(request.email());
+        }
 
+        User user = new User();
         user.setName(request.username());
         user.setEmail(request.email());
         user.setPassword(passwordEncoder.encode(request.password()));
@@ -37,7 +39,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDto getMe(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(()-> new UserExceptions.EmailAlreadyExistsException(email));
+                .orElseThrow(()-> new UsernameNotFoundException("User not found"));
 
         return toDto(user);
     }
@@ -45,7 +47,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDto updateMe(String email, UserUpdateDto update) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(()-> new UserExceptions.EmailAlreadyExistsException(email));
+                .orElseThrow(()-> new UsernameNotFoundException("User not found"));
 
         if (update.username() != null) user.setName(update.username());
         if (update.password() != null) user.setPassword(passwordEncoder.encode(update.password()));
@@ -56,7 +58,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteMe(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(()-> new UserExceptions.EmailAlreadyExistsException(email));
+                .orElseThrow(()-> new UsernameNotFoundException("User not found"));
 
         userRepository.delete(user);
     }
