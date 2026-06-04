@@ -1,13 +1,16 @@
 package com.example.Event.Management.Platform.controller;
 
-import com.example.Event.Management.Platform.model.dto.RegisterRequest;
-import com.example.Event.Management.Platform.model.dto.UserResponseDto;
-import com.example.Event.Management.Platform.model.dto.UserUpdateDto;
+import com.example.Event.Management.Platform.model.dto.*;
 import com.example.Event.Management.Platform.model.enums.Role;
+import com.example.Event.Management.Platform.security.JwtService;
 import com.example.Event.Management.Platform.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -18,6 +21,24 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.email(), request.password())
+        );
+
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String token = jwtService.generateToken(userDetails);
+
+        return ResponseEntity.ok(new AuthResponse(
+                token,
+                userDetails.getUsername(),
+                userDetails.getAuthorities().iterator().next().getAuthority()
+        ));
+    }
 
     @PostMapping("/register")
     public ResponseEntity<UserResponseDto> register(@Valid @RequestBody RegisterRequest request) {
