@@ -17,7 +17,9 @@ import com.example.Event.Management.Platform.repository.TicketRepository;
 import com.example.Event.Management.Platform.repository.UserRepository;
 import com.example.Event.Management.Platform.service.BookingService;
 import com.example.Event.Management.Platform.service.TicketServiceForBooking;
+import com.example.Event.Management.Platform.service.notification.MailService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -34,6 +36,7 @@ public class BookingServiceImpl implements BookingService {
     private final UserRepository userRepository;
     private final TicketRepository ticketRepository;
     private final TicketServiceForBooking ticketService;
+    private final MailService mailService;
 
     @Override
     public BookingResponseDto createBooking(BookingRequestDto requestDto) {
@@ -61,7 +64,11 @@ public class BookingServiceImpl implements BookingService {
         booking.setStatus(BookingStatus.ON_HOLD);
         booking.setRegisteredAt(LocalDateTime.now());
 
-        return toDto(bookingRepository.save(booking));
+        Booking saved = bookingRepository.save(booking);
+
+        mailService.sendBookingCreatedMail(saved);
+
+        return toDto(saved);
     }
 
     @Override
@@ -77,7 +84,11 @@ public class BookingServiceImpl implements BookingService {
         booking.setStatus(BookingStatus.CONFIRMED);
         ticketService.decreaseAvailability(booking.getTicket().getId());
 
-        return toDto(bookingRepository.save(booking));
+        Booking saved = bookingRepository.save(booking);
+
+        mailService.sendBookingConfirmedMail(saved);
+
+        return toDto(saved);
     }
 
     @Override
@@ -97,6 +108,28 @@ public class BookingServiceImpl implements BookingService {
         }
 
         bookingRepository.save(booking);
+
+        mailService.sendBookingCancelledByUserMail(booking);
+    }
+
+    @Scheduled(fixedRate = 3600000)
+    public void cancelExpiredBookings(){
+
+        LocalDateTime limit = LocalDateTime.now().minusHours(24);
+
+        List<Booking> bookings =
+                bookingRepository.findAllByStatusAndRegisteredAtBefore(
+                        BookingStatus.ON_HOLD,
+                        limit
+                );
+
+        for (Booking booking : bookings){
+
+            booking.setStatus(BookingStatus.CANCELED);
+            bookingRepository.save(booking);
+
+            mailService.sendBookingAutoCancelledMail(booking);
+        }
     }
 
     @Override

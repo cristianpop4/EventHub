@@ -7,6 +7,7 @@ import com.example.Event.Management.Platform.model.entity.User;
 import com.example.Event.Management.Platform.model.enums.Role;
 import com.example.Event.Management.Platform.model.exceptions.UserExceptions;
 import com.example.Event.Management.Platform.repository.UserRepository;
+import com.example.Event.Management.Platform.service.notification.MailService;
 import com.example.Event.Management.Platform.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -20,6 +21,7 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final MailService mailService;
 
     @Override
     public UserResponseDto register(RegisterRequest request) {
@@ -33,7 +35,14 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(request.password()));
         user.setRole(Role.ROLE_USER);
 
-        return toDto(userRepository.save(user));
+        User savedUser = userRepository.save(user);
+
+        mailService.sendWelcomeEmail(
+                savedUser.getEmail(),
+                savedUser.getName()
+        );
+
+        return toDto(savedUser);
     }
 
     @Override
@@ -91,6 +100,14 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(()-> new  UserExceptions.NotFoundException(id));
 
         user.setRole(role);
-        return toDto(userRepository.save(user));
+        User savedUser = userRepository.save(user);
+
+        mailService.sendRoleChangeEmail(
+                savedUser.getEmail(),
+                savedUser.getName(),
+                role
+        );
+
+        return toDto(savedUser);
     }
 }

@@ -5,6 +5,7 @@ import com.example.Event.Management.Platform.model.enums.BookingStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,4 +18,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findAllByUserIdAndStatus(Long userId, BookingStatus status);
 
     List<Booking> findAllByStatus(BookingStatus status);
+
+    List<Booking> findAllByStatusAndRegisteredAtBefore(BookingStatus bookingStatus, LocalDateTime limit);
 }

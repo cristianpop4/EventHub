@@ -9,10 +9,10 @@ import com.example.Event.Management.Platform.model.entity.Location;
 import com.example.Event.Management.Platform.model.entity.User;
 import com.example.Event.Management.Platform.model.enums.EventCategory;
 import com.example.Event.Management.Platform.model.exceptions.EventExceptions;
-import com.example.Event.Management.Platform.model.exceptions.UserExceptions;
 import com.example.Event.Management.Platform.repository.EventRepository;
 import com.example.Event.Management.Platform.repository.UserRepository;
 import com.example.Event.Management.Platform.service.EventService;
+import com.example.Event.Management.Platform.service.notification.MailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -30,6 +30,7 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final LocationServiceImpl locationService;
     private final UserRepository userRepository;
+    private final MailService mailService;
 
     @Override
     public EventResponseDto createEvent(EventRequestDto eventRequest) {
@@ -52,7 +53,13 @@ public class EventServiceImpl implements EventService {
                 .user(user)
                 .build();
 
-        return toDto(eventRepository.save(event));
+        Event savedEvent = eventRepository.save(event);
+
+        EventResponseDto dto = toDto(savedEvent);
+
+        mailService.sendEventCreatedMail(user, savedEvent);
+
+        return dto;
     }
 
     @Override
