@@ -12,6 +12,7 @@ import com.example.Event.Management.Platform.repository.EventRepository;
 import com.example.Event.Management.Platform.repository.TicketRepository;
 import com.example.Event.Management.Platform.service.TicketServiceForBooking;
 import com.example.Event.Management.Platform.service.TicketServiceForController;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -134,6 +135,7 @@ public class TicketServiceImpl implements TicketServiceForController, TicketServ
     }
 
     @Override
+    @Transactional
     public void decreaseAvailability(Long ticketId) {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new TicketExceptions.NotFoundException(ticketId));
