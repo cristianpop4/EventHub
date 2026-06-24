@@ -6,6 +6,7 @@ import com.example.Event.Management.Platform.model.dto.TicketUpdateDto;
 import com.example.Event.Management.Platform.service.TicketServiceForController;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +20,7 @@ public class TicketController {
 
     @Operation(summary = "Create ticket")
     @PostMapping
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
     public TicketResponseDto createTicket(@RequestBody TicketRequestDto dto){
         return ticketServiceForController.createTicket(dto);
@@ -52,6 +54,7 @@ public class TicketController {
 
     @Operation(summary = "Delete ticket")
     @DeleteMapping("/{ticketId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
     public void deleteTicketById(@PathVariable Long ticketId){
         ticketServiceForController.deleteTicketById(ticketId);

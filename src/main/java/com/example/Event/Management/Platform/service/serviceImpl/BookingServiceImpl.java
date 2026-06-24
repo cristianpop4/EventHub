@@ -128,6 +128,7 @@ public class BookingServiceImpl implements BookingService {
         for (Booking booking : bookings){
 
             booking.setStatus(BookingStatus.CANCELED);
+            ticketService.increaseAvailability(booking.getTicket().getId());
             bookingRepository.save(booking);
 
             mailService.sendBookingAutoCancelledMail(booking);

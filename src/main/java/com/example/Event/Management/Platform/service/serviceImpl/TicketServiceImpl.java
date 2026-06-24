@@ -137,7 +137,7 @@ public class TicketServiceImpl implements TicketServiceForController, TicketServ
     @Override
     @Transactional
     public void decreaseAvailability(Long ticketId) {
-        Ticket ticket = ticketRepository.findById(ticketId)
+        Ticket ticket = ticketRepository.findByIdWithLock(ticketId)
                 .orElseThrow(() -> new TicketExceptions.NotFoundException(ticketId));
 
         if (ticket.getAvailableQuantity() < 1) {

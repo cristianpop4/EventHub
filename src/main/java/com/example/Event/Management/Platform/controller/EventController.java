@@ -7,6 +7,7 @@ import com.example.Event.Management.Platform.model.dto.EventUpdateDto;
 import com.example.Event.Management.Platform.service.EventService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +20,7 @@ public class EventController {
 
     @Operation(summary = "Save an event in DB")
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public EventResponseDto createEvent(@RequestBody EventRequestDto eventRequest){
         return eventService.createEvent(eventRequest);
     }
@@ -49,6 +51,7 @@ public class EventController {
 
     @Operation(summary = "Delete event")
     @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteEventById(@PathVariable Long id){
         eventService.deleteEventById(id);
     }

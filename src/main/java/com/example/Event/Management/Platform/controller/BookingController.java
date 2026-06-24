@@ -6,6 +6,7 @@ import com.example.Event.Management.Platform.model.enums.BookingStatus;
 import com.example.Event.Management.Platform.service.BookingService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,6 +19,7 @@ public class BookingController {
 
     @Operation(summary = "Create booking")
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public BookingResponseDto createBooking(@RequestBody BookingRequestDto requestDto) {
         return bookingService.createBooking(requestDto);
     }
@@ -66,6 +68,7 @@ public class BookingController {
 
         @Operation(summary = "Cancel booking")
         @PutMapping("/{bookingId}/cancel")
+        @ResponseStatus(HttpStatus.NO_CONTENT)
         public void cancelBooking(@PathVariable Long bookingId){
             bookingService.cancelBooking(bookingId);
         }
