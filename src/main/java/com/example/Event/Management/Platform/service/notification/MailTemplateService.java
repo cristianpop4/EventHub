@@ -1,12 +1,9 @@
 package com.example.Event.Management.Platform.service.notification;
 
-import com.example.Event.Management.Platform.model.dto.EventResponseDto;
 import com.example.Event.Management.Platform.model.entity.Booking;
 import com.example.Event.Management.Platform.model.entity.Event;
 import com.example.Event.Management.Platform.model.entity.User;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
 
 @Service
 public class MailTemplateService {
@@ -156,7 +153,9 @@ public class MailTemplateService {
                         booking.getUser().getName(),
                         booking.getEvent().getName(),
                         booking.getEvent().getDate().toString(),
-                        booking.getEvent().getLocation().toString(),
+                        booking.getEvent().getLocation().getCity() + ", " +
+                                booking.getEvent().getLocation().getStreetName() + " " +
+                                booking.getEvent().getLocation().getNumber(),
                         booking.getTicket().getType().toString(),
                         booking.getTicket().getPrice().toString(),
                         booking.getStatus().toString()
@@ -195,7 +194,9 @@ public class MailTemplateService {
                         booking.getUser().getName(),
                         booking.getEvent().getName(),
                         booking.getEvent().getDate().toString(),
-                        booking.getEvent().getLocation().toString(),
+                        booking.getEvent().getLocation().getCity() + ", " +
+                                booking.getEvent().getLocation().getStreetName() + " " +
+                                booking.getEvent().getLocation().getNumber(),
                         booking.getTicket().getType().toString(),
                         booking.getTicket().getPrice().toString(),
                         booking.getStatus().toString()
