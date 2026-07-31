@@ -1,6 +1,5 @@
 package com.example.Event.Management.Platform.service.notification;
 
-import com.example.Event.Management.Platform.model.dto.EventResponseDto;
 import com.example.Event.Management.Platform.model.entity.Booking;
 import com.example.Event.Management.Platform.model.entity.Event;
 import com.example.Event.Management.Platform.model.entity.User;
