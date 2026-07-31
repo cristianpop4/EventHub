@@ -9,6 +9,7 @@ import com.example.Event.Management.Platform.model.enums.Role;
 import com.example.Event.Management.Platform.model.exceptions.EventExceptions;
 import com.example.Event.Management.Platform.repository.EventRepository;
 import com.example.Event.Management.Platform.repository.UserRepository;
+import com.example.Event.Management.Platform.service.notification.MailService;
 import com.example.Event.Management.Platform.service.serviceImpl.EventServiceImpl;
 import com.example.Event.Management.Platform.service.serviceImpl.LocationServiceImpl;
 import org.junit.jupiter.api.AfterEach;
@@ -43,6 +44,9 @@ public class EventServiceTests {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private MailService mailService;
 
     @InjectMocks
     private EventServiceImpl eventService;
@@ -132,6 +136,7 @@ public class EventServiceTests {
 
         verify(userRepository).findByEmail(user.getEmail());
         verify(locationService).getOrCreateLocation(eventRequest.location());
+        verify(mailService, times(1)).sendEventCreatedMail(user, event);
         verify(eventRepository).save(any(Event.class));
     }
 
@@ -144,6 +149,7 @@ public class EventServiceTests {
                 () -> eventService.createEvent(eventRequest));
 
         verify(eventRepository, never()).save(any());
+        verify(mailService, never()).sendEventCreatedMail(any(), any());
     }
 
     @Test

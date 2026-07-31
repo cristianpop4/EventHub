@@ -116,7 +116,6 @@ public class BookingServiceImpl implements BookingService {
 
     @Scheduled(fixedRate = 3600000)
     public void cancelExpiredBookings(){
-
         LocalDateTime limit = LocalDateTime.now().minusHours(24);
 
         List<Booking> bookings =
