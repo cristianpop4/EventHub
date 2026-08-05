@@ -5,6 +5,7 @@ import com.example.Event.Management.Platform.model.entity.Event;
 import com.example.Event.Management.Platform.model.entity.User;
 import com.example.Event.Management.Platform.model.enums.Role;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,7 @@ public class MailService {
         mailSender.send(message);
     }
 
-    public void sendRoleChangeEmail(String to, String username, Role role){
+    public void sendRoleChangeEmail(String to, String username, @NotNull Role role){
 
         SimpleMailMessage message = new SimpleMailMessage();
 
@@ -47,7 +48,7 @@ public class MailService {
         mailSender.send(message);
     }
 
-    public void sendEventCreatedMail(User user, Event event){
+    public void sendEventCreatedMail(@NotNull User user, Event event){
 
         SimpleMailMessage message = new SimpleMailMessage();
 
@@ -58,7 +59,7 @@ public class MailService {
         mailSender.send(message);
     }
 
-    public void sendBookingCreatedMail(Booking booking){
+    public void sendBookingCreatedMail(@NotNull Booking booking){
 
         SimpleMailMessage message = new SimpleMailMessage();
 
@@ -70,7 +71,7 @@ public class MailService {
         mailSender.send(message);
     }
 
-    public void sendBookingConfirmedMail(Booking booking){
+    public void sendBookingConfirmedMail(@NotNull Booking booking){
 
         SimpleMailMessage message = new SimpleMailMessage();
 
@@ -83,7 +84,7 @@ public class MailService {
 
     }
 
-    public void sendBookingCancelledByUserMail(Booking booking) {
+    public void sendBookingCancelledByUserMail(@NotNull Booking booking) {
 
         SimpleMailMessage message = new SimpleMailMessage();
 
@@ -97,7 +98,7 @@ public class MailService {
         mailSender.send(message);
     }
 
-    public void sendBookingAutoCancelledMail(Booking booking){
+    public void sendBookingAutoCancelledMail(@NotNull Booking booking){
 
         SimpleMailMessage message = new SimpleMailMessage();
 

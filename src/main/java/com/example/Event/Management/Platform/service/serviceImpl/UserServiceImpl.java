@@ -10,6 +10,7 @@ import com.example.Event.Management.Platform.repository.UserRepository;
 import com.example.Event.Management.Platform.service.notification.MailService;
 import com.example.Event.Management.Platform.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,7 @@ public class UserServiceImpl implements UserService {
     private final MailService mailService;
 
     @Override
-    public UserResponseDto register(RegisterRequest request) {
+    public UserResponseDto register(@NotNull RegisterRequest request) {
         if (userRepository.findByEmail(request.email()).isPresent()) {
             throw new UserExceptions.EmailAlreadyExistsException(request.email());
         }
@@ -54,7 +55,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDto updateMe(String email, UserUpdateDto update) {
+    public UserResponseDto updateMe(String email, @NotNull UserUpdateDto update) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(()-> new UsernameNotFoundException("User not found"));
 
