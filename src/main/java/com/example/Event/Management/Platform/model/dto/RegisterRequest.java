@@ -10,8 +10,8 @@ public record RegisterRequest(
         @Size(min = 2, max = 50, message = "The name must have between 2 and 50 characters")
         String username,
 
+        @NotBlank(message = "Email is required")
         @Email(message = "Invalid email")
-        @NotBlank(message = " ")
         String email,
 
         @NotBlank(message = " ")

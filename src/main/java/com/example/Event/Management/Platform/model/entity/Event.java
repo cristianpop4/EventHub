@@ -39,9 +39,11 @@ public class Event {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Builder.Default
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
     private List<Ticket> tickets = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
     private List<Booking> bookings = new ArrayList<>();
 }

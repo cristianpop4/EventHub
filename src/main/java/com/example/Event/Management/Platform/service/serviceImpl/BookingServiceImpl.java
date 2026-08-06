@@ -20,6 +20,7 @@ import com.example.Event.Management.Platform.service.TicketServiceForBooking;
 import com.example.Event.Management.Platform.service.notification.MailService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -40,7 +41,7 @@ public class BookingServiceImpl implements BookingService {
     private final MailService mailService;
 
     @Override
-    public BookingResponseDto createBooking(BookingRequestDto requestDto) {
+    public BookingResponseDto createBooking(@NotNull BookingRequestDto requestDto) {
         String email = Objects.requireNonNull(SecurityContextHolder.getContext()
                         .getAuthentication())
                 .getName();

@@ -4,6 +4,7 @@ import com.example.Event.Management.Platform.model.dto.LocationRequestDto;
 import com.example.Event.Management.Platform.model.entity.Location;
 import com.example.Event.Management.Platform.repository.LocationRepository;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Service;
 public class LocationServiceImpl {
     private final LocationRepository repository;
 
-    public Location getOrCreateLocation(LocationRequestDto request){
+    public Location getOrCreateLocation(@NotNull LocationRequestDto request){
         return repository.findByStreetNameAndNumberAndCityAndZipCode(request.streetName(), request.number(), request.city(), request.zipCode())
                 .orElseGet(()->{
                     Location location = new Location(null, null, request.streetName(), request.number(), request.city(), request.zipCode());

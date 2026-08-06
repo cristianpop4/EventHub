@@ -14,6 +14,7 @@ import com.example.Event.Management.Platform.repository.UserRepository;
 import com.example.Event.Management.Platform.service.EventService;
 import com.example.Event.Management.Platform.service.notification.MailService;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,7 @@ public class EventServiceImpl implements EventService {
     private final MailService mailService;
 
     @Override
-    public EventResponseDto createEvent(EventRequestDto eventRequest) {
+    public EventResponseDto createEvent(@NotNull EventRequestDto eventRequest) {
         String email = Objects.requireNonNull(SecurityContextHolder.getContext()
                         .getAuthentication())
                 .getName();
@@ -78,7 +79,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventResponseDto updateEvent(Long id, EventUpdateDto dto) {
+    public EventResponseDto updateEvent(Long id, @NotNull EventUpdateDto dto) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new EventExceptions.NotFoundExceptions(id));
 
@@ -95,7 +96,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventResponseDto partialUpdateEvent(Long id, EventUpdateDto dto) {
+    public EventResponseDto partialUpdateEvent(Long id, @NotNull EventUpdateDto dto) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new EventExceptions.NotFoundExceptions(id));
 
@@ -121,7 +122,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventResponseDto> searchEvents(EventSearchDto search) {
+    public List<EventResponseDto> searchEvents(@NotNull EventSearchDto search) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         return eventRepository.searchEvents(

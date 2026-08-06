@@ -5,6 +5,7 @@ import com.example.Event.Management.Platform.model.dto.BookingResponseDto;
 import com.example.Event.Management.Platform.model.enums.BookingStatus;
 import com.example.Event.Management.Platform.service.BookingService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ public class BookingController {
     @Operation(summary = "Create booking")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public BookingResponseDto createBooking(@RequestBody BookingRequestDto requestDto) {
+    public BookingResponseDto createBooking(@Valid @RequestBody BookingRequestDto requestDto) {
         return bookingService.createBooking(requestDto);
     }
 

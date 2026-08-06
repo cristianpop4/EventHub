@@ -14,6 +14,7 @@ import com.example.Event.Management.Platform.service.TicketServiceForBooking;
 import com.example.Event.Management.Platform.service.TicketServiceForController;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +28,7 @@ public class TicketServiceImpl implements TicketServiceForController, TicketServ
     private final EventRepository eventRepository;
 
     @Override
-    public TicketResponseDto createTicket(TicketRequestDto dto) {
+    public TicketResponseDto createTicket(@NotNull TicketRequestDto dto) {
         Event event = eventRepository.findById(dto.eventId())
                 .orElseThrow(() -> new EventExceptions.NotFoundExceptions(dto.eventId()));
 
@@ -76,7 +77,7 @@ public class TicketServiceImpl implements TicketServiceForController, TicketServ
     }
 
     @Override
-    public TicketResponseDto updateTicket(Long ticketId, TicketUpdateDto update) {
+    public TicketResponseDto updateTicket(Long ticketId, @NotNull TicketUpdateDto update) {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new TicketExceptions.NotFoundException(ticketId));
 

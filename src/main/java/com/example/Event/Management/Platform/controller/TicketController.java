@@ -5,6 +5,7 @@ import com.example.Event.Management.Platform.model.dto.TicketResponseDto;
 import com.example.Event.Management.Platform.model.dto.TicketUpdateDto;
 import com.example.Event.Management.Platform.service.TicketServiceForController;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,7 +23,7 @@ public class TicketController {
     @PostMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
-    public TicketResponseDto createTicket(@RequestBody TicketRequestDto dto){
+    public TicketResponseDto createTicket(@Valid @RequestBody TicketRequestDto dto){
         return ticketServiceForController.createTicket(dto);
     }
 
@@ -48,7 +49,7 @@ public class TicketController {
     @Operation(summary = "Update ticket")
     @PutMapping("/{ticketId}")
     @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
-    public TicketResponseDto updateTicket(@PathVariable Long ticketId,@RequestBody TicketUpdateDto update){
+    public TicketResponseDto updateTicket(@PathVariable Long ticketId, @Valid @RequestBody TicketUpdateDto update){
         return ticketServiceForController.updateTicket(ticketId, update);
     }
 
