@@ -6,6 +6,7 @@ import com.example.Event.Management.Platform.security.JwtService;
 import com.example.Event.Management.Platform.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,7 +27,7 @@ public class UserController {
     private final JwtService jwtService;
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest request) {
+    public ResponseEntity<AuthResponse> login(@NotNull @Valid @RequestBody AuthRequest request) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.email(), request.password())
         );
@@ -44,21 +45,22 @@ public class UserController {
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<UserResponseDto> register(@Valid @RequestBody RegisterRequest request) {
-        return ResponseEntity.ok(userService.register(request));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(userService.register(request));
     }
 
     @GetMapping("/me")
-    public UserResponseDto me(Principal principal) {
+    public UserResponseDto me(@NotNull Principal principal) {
         return userService.getMe(principal.getName());
     }
 
     @PutMapping("/me")
-    public UserResponseDto updateMe(Principal principal, @Valid @RequestBody UserUpdateDto update) {
+    public UserResponseDto updateMe(@NotNull Principal principal, @Valid @RequestBody UserUpdateDto update) {
         return userService.updateMe(principal.getName(), update);
     }
 
     @DeleteMapping("/me")
-    public ResponseEntity<Void> deleteMe(Principal principal) {
+    public ResponseEntity<Void> deleteMe(@NotNull Principal principal) {
         userService.deleteMe(principal.getName());
         return ResponseEntity.noContent().build();
     }

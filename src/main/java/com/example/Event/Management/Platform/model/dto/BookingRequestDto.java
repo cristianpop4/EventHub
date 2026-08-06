@@ -1,7 +1,7 @@
 package com.example.Event.Management.Platform.model.dto;
 
 import jakarta.validation.constraints.Positive;
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 public record BookingRequestDto(
         @NotNull
