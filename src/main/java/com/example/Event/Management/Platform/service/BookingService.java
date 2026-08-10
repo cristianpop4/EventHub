@@ -3,19 +3,20 @@ package com.example.Event.Management.Platform.service;
 import com.example.Event.Management.Platform.model.dto.*;
 import com.example.Event.Management.Platform.model.entity.Booking;
 import com.example.Event.Management.Platform.model.enums.BookingStatus;
+import com.example.Event.Management.Platform.security.CustomUserDetails;
 
 import java.util.List;
 
 public interface BookingService {
     BookingResponseDto createBooking(BookingRequestDto requestDto);
-    BookingResponseDto getBookingById(Long bookingId);
+    BookingResponseDto getBookingById(Long bookingId, CustomUserDetails currentUser);
     List<BookingResponseDto> getAllBookings();
-    List<BookingResponseDto> getBookingsByUserId(Long userId);
-    List<BookingResponseDto> getBookingsByEventId(Long eventId);
+    List<BookingResponseDto> getBookingsByUserId(Long userId, CustomUserDetails currentUser);
+    List<BookingResponseDto> getBookingsByEventId(Long eventId, CustomUserDetails currentUser);
     List<BookingResponseDto> getBookingsByStatus(BookingStatus status);
-    List<BookingResponseDto> getBookingsByUserIdAndStatus(Long userId, BookingStatus status);
-    BookingResponseDto confirmBooking(Long bookingId);
-    void cancelBooking(Long bookingId);
+    List<BookingResponseDto> getBookingsByUserIdAndStatus(Long userId, BookingStatus status, CustomUserDetails currentUser);
+    BookingResponseDto confirmBooking(Long bookingId, CustomUserDetails currentUser);
+    void cancelBooking(Long bookingId, CustomUserDetails currentUser);
 
     default BookingResponseDto toDto(Booking booking){
         return new BookingResponseDto(

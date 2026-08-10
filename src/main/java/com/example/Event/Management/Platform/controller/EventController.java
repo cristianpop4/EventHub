@@ -4,11 +4,13 @@ import com.example.Event.Management.Platform.model.dto.EventRequestDto;
 import com.example.Event.Management.Platform.model.dto.EventResponseDto;
 import com.example.Event.Management.Platform.model.dto.EventSearchDto;
 import com.example.Event.Management.Platform.model.dto.EventUpdateDto;
+import com.example.Event.Management.Platform.security.CustomUserDetails;
 import com.example.Event.Management.Platform.service.EventService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -40,21 +42,26 @@ public class EventController {
 
     @Operation(summary = "Update event")
     @PutMapping("/{id}")
-    public EventResponseDto updateEvent(@PathVariable Long id, @Valid @RequestBody EventUpdateDto dto){
-        return eventService.updateEvent(id, dto);
+    public EventResponseDto updateEvent(@PathVariable Long id,
+                                        @Valid @RequestBody EventUpdateDto dto,
+                                        @AuthenticationPrincipal CustomUserDetails currentUser){
+        return eventService.updateEvent(id, dto, currentUser);
     }
 
     @Operation(summary = "Partial update event")
     @PatchMapping("/{id}")
-    public EventResponseDto partialUpdateEvent(@PathVariable Long id, @Valid @RequestBody EventUpdateDto dto){
-        return eventService.partialUpdateEvent(id, dto);
+    public EventResponseDto partialUpdateEvent(@PathVariable Long id,
+                                               @Valid @RequestBody EventUpdateDto dto,
+                                               @AuthenticationPrincipal CustomUserDetails currentUser){
+        return eventService.partialUpdateEvent(id, dto, currentUser);
     }
 
     @Operation(summary = "Delete event")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteEventById(@PathVariable Long id){
-        eventService.deleteEventById(id);
+    public void deleteEventById(@PathVariable Long id,
+                                @AuthenticationPrincipal CustomUserDetails currentUser){
+        eventService.deleteEventById(id, currentUser);
     }
 
     @Operation(summary = "Search event")

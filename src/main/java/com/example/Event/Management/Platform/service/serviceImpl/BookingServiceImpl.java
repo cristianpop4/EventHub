@@ -7,14 +7,13 @@ import com.example.Event.Management.Platform.model.entity.Event;
 import com.example.Event.Management.Platform.model.entity.Ticket;
 import com.example.Event.Management.Platform.model.entity.User;
 import com.example.Event.Management.Platform.model.enums.BookingStatus;
-import com.example.Event.Management.Platform.model.exceptions.BookingExceptions;
-import com.example.Event.Management.Platform.model.exceptions.EventExceptions;
-import com.example.Event.Management.Platform.model.exceptions.TicketExceptions;
-import com.example.Event.Management.Platform.model.exceptions.UserExceptions;
+import com.example.Event.Management.Platform.model.enums.Role;
+import com.example.Event.Management.Platform.model.exceptions.*;
 import com.example.Event.Management.Platform.repository.BookingRepository;
 import com.example.Event.Management.Platform.repository.EventRepository;
 import com.example.Event.Management.Platform.repository.TicketRepository;
 import com.example.Event.Management.Platform.repository.UserRepository;
+import com.example.Event.Management.Platform.security.CustomUserDetails;
 import com.example.Event.Management.Platform.service.BookingService;
 import com.example.Event.Management.Platform.service.TicketServiceForBooking;
 import com.example.Event.Management.Platform.service.notification.MailService;
@@ -75,9 +74,15 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public BookingResponseDto confirmBooking(Long bookingId) {
+    public BookingResponseDto confirmBooking(Long bookingId, CustomUserDetails currentUser) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new BookingExceptions.NotFoundException(bookingId));
+
+        boolean isOwner = booking.getUser().getId().equals(currentUser.getId());
+
+        if (!isOwner){
+            throw new ForbiddenException();
+        }
 
         if (booking.getStatus() != BookingStatus.ON_HOLD) {
             throw new BookingExceptions.StatusConflictException("confirm", booking.getId(),
@@ -95,9 +100,16 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public void cancelBooking(Long bookingId) {
+    public void cancelBooking(Long bookingId, CustomUserDetails currentUser) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new BookingExceptions.NotFoundException(bookingId));
+
+        boolean isOwner = booking.getUser().getId().equals(currentUser.getId());
+        boolean isAdmin = currentUser.getRole().equals(Role.ROLE_ADMIN);
+
+        if (!isOwner){
+            throw new ForbiddenException();
+        }
 
         if (booking.getStatus() != BookingStatus.ON_HOLD && booking.getStatus() != BookingStatus.CONFIRMED) {
             throw new BookingExceptions.StatusConflictException("cancel", bookingId, booking.getStatus(), List.of(BookingStatus.ON_HOLD, BookingStatus.CONFIRMED));
@@ -136,9 +148,18 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public BookingResponseDto getBookingById(Long bookingId) {
-        return toDto(bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new BookingExceptions.NotFoundException(bookingId)));
+    public BookingResponseDto getBookingById(Long bookingId, @NotNull CustomUserDetails currentUser) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new BookingExceptions.NotFoundException(bookingId));
+
+        boolean isOwner = booking.getUser().getId().equals(currentUser.getId());
+        boolean isAdmin = booking.getUser().getRole().equals(Role.ROLE_ADMIN);
+
+        if (!isAdmin && !isOwner){
+            throw new ForbiddenException();
+        }
+
+        return toDto(booking);
     }
 
     @Override
@@ -150,9 +171,17 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingResponseDto> getBookingsByUserId(Long userId) {
-        userRepository.findById(userId)
+    public List<BookingResponseDto> getBookingsByUserId(Long userId, @NotNull CustomUserDetails currentUser) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserExceptions.NotFoundException(userId));
+
+        boolean isOwner = userId.equals(currentUser.getId());
+        boolean isAdmin = user.getRole().equals(Role.ROLE_ADMIN);
+
+        if (!isAdmin && !isOwner){
+            throw new ForbiddenException();
+        }
+
         return bookingRepository.findAllByUserId(userId)
                 .stream()
                 .map(this::toDto)
@@ -160,9 +189,17 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingResponseDto> getBookingsByEventId(Long eventId) {
-        eventRepository.findById(eventId)
+    public List<BookingResponseDto> getBookingsByEventId(Long eventId, CustomUserDetails currentUser) {
+        Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EventExceptions.NotFoundExceptions(eventId));
+
+        boolean isOrganizer = event.getUser().getId().equals(currentUser.getId());
+        boolean isAdmin = currentUser.getRole().equals(Role.ROLE_ADMIN);
+
+        if (!isOrganizer && !isAdmin){
+            throw new ForbiddenException();
+        }
+
         return bookingRepository.findAllByEventId(eventId)
                 .stream()
                 .map(this::toDto)
@@ -178,9 +215,17 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingResponseDto> getBookingsByUserIdAndStatus(Long userId, BookingStatus status) {
-        userRepository.findById(userId)
+    public List<BookingResponseDto> getBookingsByUserIdAndStatus(Long userId, BookingStatus status, @NotNull CustomUserDetails currentUser) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserExceptions.NotFoundException(userId));
+
+        boolean isOwner = userId.equals(currentUser.getId());
+        boolean isAdmin = user.getRole().equals(Role.ROLE_ADMIN);
+
+        if (!isAdmin && !isOwner){
+            throw new ForbiddenException();
+        }
+
         return bookingRepository.findAllByUserIdAndStatus(userId, status)
                 .stream()
                 .map(this::toDto)

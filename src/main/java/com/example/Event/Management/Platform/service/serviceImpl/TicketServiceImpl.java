@@ -5,11 +5,14 @@ import com.example.Event.Management.Platform.model.dto.TicketResponseDto;
 import com.example.Event.Management.Platform.model.dto.TicketUpdateDto;
 import com.example.Event.Management.Platform.model.entity.Event;
 import com.example.Event.Management.Platform.model.entity.Ticket;
+import com.example.Event.Management.Platform.model.enums.Role;
 import com.example.Event.Management.Platform.model.enums.TicketType;
 import com.example.Event.Management.Platform.model.exceptions.EventExceptions;
+import com.example.Event.Management.Platform.model.exceptions.ForbiddenException;
 import com.example.Event.Management.Platform.model.exceptions.TicketExceptions;
 import com.example.Event.Management.Platform.repository.EventRepository;
 import com.example.Event.Management.Platform.repository.TicketRepository;
+import com.example.Event.Management.Platform.security.CustomUserDetails;
 import com.example.Event.Management.Platform.service.TicketServiceForBooking;
 import com.example.Event.Management.Platform.service.TicketServiceForController;
 import jakarta.transaction.Transactional;
@@ -77,12 +80,19 @@ public class TicketServiceImpl implements TicketServiceForController, TicketServ
     }
 
     @Override
-    public TicketResponseDto updateTicket(Long ticketId, @NotNull TicketUpdateDto update) {
+    public TicketResponseDto updateTicket(Long ticketId, @NotNull TicketUpdateDto update, @NotNull CustomUserDetails currentUser) {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new TicketExceptions.NotFoundException(ticketId));
 
         Event event = eventRepository.findById(update.eventId())
                 .orElseThrow(() -> new EventExceptions.NotFoundExceptions(update.eventId()));
+
+        boolean isOrganizer = ticket.getEvent().getUser().getId().equals(currentUser.getId());
+        boolean isAdmin = currentUser.getRole().equals(Role.ROLE_ADMIN);
+
+        if (!isAdmin && isOrganizer){
+            throw new ForbiddenException();
+        }
 
         if (update.price() < 0) {
             throw new TicketExceptions.InvalidDataException("price", "must be positive");
@@ -113,9 +123,16 @@ public class TicketServiceImpl implements TicketServiceForController, TicketServ
     }
 
     @Override
-    public void deleteTicketById(Long ticketId) {
+    public void deleteTicketById(Long ticketId, @NotNull CustomUserDetails currentUser) {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new TicketExceptions.NotFoundException(ticketId));
+
+        boolean isOrganizer = ticket.getEvent().getUser().getId().equals(currentUser.getId());
+        boolean isAdmin = currentUser.getRole().equals(Role.ROLE_ADMIN);
+
+        if (!isAdmin && isOrganizer){
+            throw new ForbiddenException();
+        }
 
         ticketRepository.delete(ticket);
     }

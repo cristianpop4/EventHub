@@ -8,9 +8,12 @@ import com.example.Event.Management.Platform.model.entity.Event;
 import com.example.Event.Management.Platform.model.entity.Location;
 import com.example.Event.Management.Platform.model.entity.User;
 import com.example.Event.Management.Platform.model.enums.EventCategory;
+import com.example.Event.Management.Platform.model.enums.Role;
 import com.example.Event.Management.Platform.model.exceptions.EventExceptions;
+import com.example.Event.Management.Platform.model.exceptions.ForbiddenException;
 import com.example.Event.Management.Platform.repository.EventRepository;
 import com.example.Event.Management.Platform.repository.UserRepository;
+import com.example.Event.Management.Platform.security.CustomUserDetails;
 import com.example.Event.Management.Platform.service.EventService;
 import com.example.Event.Management.Platform.service.notification.MailService;
 import lombok.RequiredArgsConstructor;
@@ -79,9 +82,16 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventResponseDto updateEvent(Long id, @NotNull EventUpdateDto dto) {
+    public EventResponseDto updateEvent(Long id, @NotNull EventUpdateDto dto, CustomUserDetails currentUser) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new EventExceptions.NotFoundExceptions(id));
+
+        boolean isOrganizer = event.getUser().getId().equals(currentUser.getId());
+        boolean isAdmin = currentUser.getRole().equals(Role.ROLE_ADMIN);
+
+        if (!isAdmin && !isOrganizer){
+            throw new ForbiddenException();
+        }
 
         Location location = locationService.getOrCreateLocation(dto.location());
 
@@ -96,9 +106,16 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventResponseDto partialUpdateEvent(Long id, @NotNull EventUpdateDto dto) {
+    public EventResponseDto partialUpdateEvent(Long id, @NotNull EventUpdateDto dto, CustomUserDetails currentUser) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new EventExceptions.NotFoundExceptions(id));
+
+        boolean isOrganizer = event.getUser().getId().equals(currentUser.getId());
+        boolean isAdmin = currentUser.getRole().equals(Role.ROLE_ADMIN);
+
+        if (!isAdmin && !isOrganizer){
+            throw new ForbiddenException();
+        }
 
         if (dto.name() != null) event.setName(dto.name());
         if (dto.description() != null) event.setDescription(dto.description());
@@ -114,9 +131,16 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public void deleteEventById(Long id) {
+    public void deleteEventById(Long id, CustomUserDetails currentUser) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new EventExceptions.NotFoundExceptions(id));
+
+        boolean isOrganizer = event.getUser().getId().equals(currentUser.getId());
+        boolean isAdmin = currentUser.getRole().equals(Role.ROLE_ADMIN);
+
+        if (!isAdmin && !isOrganizer){
+            throw new ForbiddenException();
+        }
 
         eventRepository.delete(event);
     }

@@ -3,12 +3,14 @@ package com.example.Event.Management.Platform.controller;
 import com.example.Event.Management.Platform.model.dto.TicketRequestDto;
 import com.example.Event.Management.Platform.model.dto.TicketResponseDto;
 import com.example.Event.Management.Platform.model.dto.TicketUpdateDto;
+import com.example.Event.Management.Platform.security.CustomUserDetails;
 import com.example.Event.Management.Platform.service.TicketServiceForController;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,7 +23,7 @@ public class TicketController {
 
     @Operation(summary = "Create ticket")
     @PostMapping
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
     public TicketResponseDto createTicket(@Valid @RequestBody TicketRequestDto dto){
         return ticketServiceForController.createTicket(dto);
@@ -49,16 +51,19 @@ public class TicketController {
     @Operation(summary = "Update ticket")
     @PutMapping("/{ticketId}")
     @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
-    public TicketResponseDto updateTicket(@PathVariable Long ticketId, @Valid @RequestBody TicketUpdateDto update){
-        return ticketServiceForController.updateTicket(ticketId, update);
+    public TicketResponseDto updateTicket(@PathVariable Long ticketId,
+                                          @Valid @RequestBody TicketUpdateDto update,
+                                          @AuthenticationPrincipal CustomUserDetails currentUser){
+        return ticketServiceForController.updateTicket(ticketId, update, currentUser);
     }
 
     @Operation(summary = "Delete ticket")
     @DeleteMapping("/{ticketId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
-    public void deleteTicketById(@PathVariable Long ticketId){
-        ticketServiceForController.deleteTicketById(ticketId);
+    public void deleteTicketById(@PathVariable Long ticketId,
+                                 @AuthenticationPrincipal CustomUserDetails currentUser){
+        ticketServiceForController.deleteTicketById(ticketId, currentUser);
     }
 
 }
