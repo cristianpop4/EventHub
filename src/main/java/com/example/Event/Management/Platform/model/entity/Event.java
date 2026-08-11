@@ -2,10 +2,7 @@ package com.example.Event.Management.Platform.model.entity;
 
 import com.example.Event.Management.Platform.model.enums.EventCategory;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -39,10 +36,12 @@ public class Event {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @ToString.Exclude
     @Builder.Default
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
     private List<Ticket> tickets = new ArrayList<>();
 
+    @ToString.Exclude
     @Builder.Default
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
     private List<Booking> bookings = new ArrayList<>();
