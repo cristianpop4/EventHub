@@ -90,7 +90,7 @@ public class TicketServiceImpl implements TicketServiceForController, TicketServ
         boolean isOrganizer = ticket.getEvent().getUser().getId().equals(currentUser.getId());
         boolean isAdmin = currentUser.getRole().equals(Role.ROLE_ADMIN);
 
-        if (!isAdmin && isOrganizer){
+        if (!isAdmin && !isOrganizer){
             throw new ForbiddenException();
         }
 
@@ -130,7 +130,7 @@ public class TicketServiceImpl implements TicketServiceForController, TicketServ
         boolean isOrganizer = ticket.getEvent().getUser().getId().equals(currentUser.getId());
         boolean isAdmin = currentUser.getRole().equals(Role.ROLE_ADMIN);
 
-        if (!isAdmin && isOrganizer){
+        if (!isAdmin && !isOrganizer){
             throw new ForbiddenException();
         }
 

@@ -7,8 +7,10 @@ import com.example.Event.Management.Platform.model.entity.User;
 import com.example.Event.Management.Platform.model.enums.EventCategory;
 import com.example.Event.Management.Platform.model.enums.Role;
 import com.example.Event.Management.Platform.model.exceptions.EventExceptions;
+import com.example.Event.Management.Platform.model.exceptions.ForbiddenException;
 import com.example.Event.Management.Platform.repository.EventRepository;
 import com.example.Event.Management.Platform.repository.UserRepository;
+import com.example.Event.Management.Platform.security.CustomUserDetails;
 import com.example.Event.Management.Platform.service.notification.MailService;
 import com.example.Event.Management.Platform.service.serviceImpl.EventServiceImpl;
 import com.example.Event.Management.Platform.service.serviceImpl.LocationServiceImpl;
@@ -55,6 +57,7 @@ public class EventServiceTests {
     private EventRequestDto eventRequest;
     private Location location;
     private User user;
+    private CustomUserDetails currentUser;
 
     @BeforeEach
     void setUp() {
@@ -107,6 +110,8 @@ public class EventServiceTests {
         lenient().when(securityContext.getAuthentication()).thenReturn(authentication);
         lenient().when(authentication.getName()).thenReturn("test@example.com");
         SecurityContextHolder.setContext(securityContext);
+
+        currentUser = new CustomUserDetails(user);
     }
 
     @AfterEach
@@ -208,7 +213,7 @@ public class EventServiceTests {
         when(eventRepository.save(any(Event.class)))
                 .thenReturn(event);
 
-        EventResponseDto updated = eventService.updateEvent(1L, updateDto);
+        EventResponseDto updated = eventService.updateEvent(1L, updateDto, currentUser);
 
         assertNotNull(updated);
         assertEquals(updated.name(), updateDto.name());
@@ -219,6 +224,60 @@ public class EventServiceTests {
 
         verify(locationService).getOrCreateLocation(updateDto.location());
         verify(eventRepository).save(any(Event.class));
+    }
+
+    @Test
+    void partialUpdateEvent_ShouldSaveEvent_WhenOwner() {
+        EventUpdateDto updateDto = new EventUpdateDto(
+                "Updated name only",
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+
+        when(eventRepository.findById(1L))
+                .thenReturn(Optional.of(event));
+        when(eventRepository.save(any(Event.class)))
+                .thenReturn(event);
+
+        EventResponseDto updated = eventService.partialUpdateEvent(1L, updateDto, currentUser);
+
+        assertNotNull(updated);
+        assertEquals(updateDto.name(), updated.name());
+
+        verify(eventRepository).save(any(Event.class));
+        verify(locationService, never()).getOrCreateLocation(any());
+    }
+
+    @Test
+    void partialUpdateEvent_ShouldThrow_WhenNotOwnerAndNotAdmin() {
+        User otherUser = new User(
+                2L,
+                "Other Organizer",
+                "other@example.com",
+                "Password12!",
+                Role.ROLE_ORGANIZER
+        );
+        CustomUserDetails otherCurrentUser = new CustomUserDetails(otherUser);
+
+        EventUpdateDto updateDto = new EventUpdateDto(
+                "Updated name only",
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+
+        when(eventRepository.findById(1L))
+                .thenReturn(Optional.of(event));
+
+        assertThrows(ForbiddenException.class,
+                () -> eventService.partialUpdateEvent(1L, updateDto, otherCurrentUser));
+
+        verify(eventRepository, never()).save(any(Event.class));
     }
 
     @Test
@@ -238,7 +297,7 @@ public class EventServiceTests {
         when(eventRepository.findById(1L))
                 .thenReturn(Optional.of(event));
 
-        eventService.deleteEventById(1L);
+        eventService.deleteEventById(1L, currentUser);
 
         verify(eventRepository).delete(event);
     }

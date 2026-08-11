@@ -107,7 +107,7 @@ public class BookingServiceImpl implements BookingService {
         boolean isOwner = booking.getUser().getId().equals(currentUser.getId());
         boolean isAdmin = currentUser.getRole().equals(Role.ROLE_ADMIN);
 
-        if (!isOwner){
+        if (!isOwner && !isAdmin){
             throw new ForbiddenException();
         }
 
@@ -153,7 +153,7 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new BookingExceptions.NotFoundException(bookingId));
 
         boolean isOwner = booking.getUser().getId().equals(currentUser.getId());
-        boolean isAdmin = booking.getUser().getRole().equals(Role.ROLE_ADMIN);
+        boolean isAdmin = currentUser.getRole().equals(Role.ROLE_ADMIN);
 
         if (!isAdmin && !isOwner){
             throw new ForbiddenException();
@@ -176,7 +176,7 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new UserExceptions.NotFoundException(userId));
 
         boolean isOwner = userId.equals(currentUser.getId());
-        boolean isAdmin = user.getRole().equals(Role.ROLE_ADMIN);
+        boolean isAdmin = currentUser.getRole().equals(Role.ROLE_ADMIN);
 
         if (!isAdmin && !isOwner){
             throw new ForbiddenException();
@@ -220,7 +220,7 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new UserExceptions.NotFoundException(userId));
 
         boolean isOwner = userId.equals(currentUser.getId());
-        boolean isAdmin = user.getRole().equals(Role.ROLE_ADMIN);
+        boolean isAdmin = currentUser.getRole().equals(Role.ROLE_ADMIN);
 
         if (!isAdmin && !isOwner){
             throw new ForbiddenException();

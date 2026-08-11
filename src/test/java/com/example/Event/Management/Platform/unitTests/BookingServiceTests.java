@@ -14,6 +14,7 @@ import com.example.Event.Management.Platform.repository.BookingRepository;
 import com.example.Event.Management.Platform.repository.EventRepository;
 import com.example.Event.Management.Platform.repository.TicketRepository;
 import com.example.Event.Management.Platform.repository.UserRepository;
+import com.example.Event.Management.Platform.security.CustomUserDetails;
 import com.example.Event.Management.Platform.service.TicketServiceForBooking;
 import com.example.Event.Management.Platform.service.notification.MailService;
 import com.example.Event.Management.Platform.service.serviceImpl.BookingServiceImpl;
@@ -64,6 +65,7 @@ public class BookingServiceTests {
     private Ticket ticket;
     private Booking booking;
     private BookingRequestDto requestDto;
+    private CustomUserDetails currentUser;
 
     @BeforeEach
     void setUp() {
@@ -113,6 +115,8 @@ public class BookingServiceTests {
                 BookingStatus.ON_HOLD,
                 LocalDateTime.now()
         );
+
+        currentUser = new CustomUserDetails(user);
 
         Authentication authentication = mock(Authentication.class);
         SecurityContext securityContext = mock(SecurityContext.class);
@@ -174,7 +178,7 @@ public class BookingServiceTests {
         doNothing().when(ticketService)
                 .decreaseAvailability(ticket.getId());
 
-        BookingResponseDto responseDto = bookingService.confirmBooking(booking.getId());
+        BookingResponseDto responseDto = bookingService.confirmBooking(booking.getId(), currentUser);
 
         assertNotNull(responseDto);
         assertEquals(BookingStatus.CONFIRMED, responseDto.status());
@@ -193,7 +197,7 @@ public class BookingServiceTests {
                 .thenReturn(Optional.of(booking));
 
         assertThrows(BookingExceptions.StatusConflictException.class,
-                () -> bookingService.confirmBooking(booking.getId()));
+                () -> bookingService.confirmBooking(booking.getId(), currentUser));
 
         verify(bookingRepository, never()).save(any());
         verify(ticketService, never()).decreaseAvailability(any());
@@ -207,7 +211,7 @@ public class BookingServiceTests {
         when(bookingRepository.save(any(Booking.class)))
                 .thenReturn(booking);
 
-        bookingService.cancelBooking(booking.getId());
+        bookingService.cancelBooking(booking.getId(), currentUser);
 
         assertEquals(BookingStatus.CANCELED, booking.getStatus());
 
@@ -228,7 +232,7 @@ public class BookingServiceTests {
         doNothing().when(ticketService)
                 .increaseAvailability(ticket.getId());
 
-        bookingService.cancelBooking(booking.getId());
+        bookingService.cancelBooking(booking.getId(), currentUser);
 
         assertEquals(BookingStatus.CANCELED, booking.getStatus());
 
@@ -246,7 +250,7 @@ public class BookingServiceTests {
                 .thenReturn(Optional.of(booking));
 
         assertThrows(BookingExceptions.StatusConflictException.class,
-                () -> bookingService.cancelBooking(booking.getId()));
+                () -> bookingService.cancelBooking(booking.getId(), currentUser));
 
         verify(bookingRepository, never()).save(any());
         verify(ticketService, never()).increaseAvailability(any());
@@ -293,7 +297,7 @@ public class BookingServiceTests {
         when(bookingRepository.findById(1L))
                 .thenReturn(Optional.of(booking));
 
-        BookingResponseDto response = bookingService.getBookingById(1L);
+        BookingResponseDto response = bookingService.getBookingById(1L, currentUser);
 
         assertNotNull(response);
         assertEquals(1L, response.bookingId());
@@ -305,7 +309,7 @@ public class BookingServiceTests {
                 .thenReturn(Optional.empty());
 
         assertThrows(BookingExceptions.NotFoundException.class,
-                () -> bookingService.getBookingById(99L));
+                () -> bookingService.getBookingById(99L, currentUser));
     }
 
     @Test
@@ -342,7 +346,7 @@ public class BookingServiceTests {
         when(bookingRepository.findAllByUserId(user.getId()))
                 .thenReturn(List.of(booking));
 
-        List<BookingResponseDto> result = bookingService.getBookingsByUserId(user.getId());
+        List<BookingResponseDto> result = bookingService.getBookingsByUserId(user.getId(), currentUser);
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -356,7 +360,7 @@ public class BookingServiceTests {
                 .thenReturn(Optional.empty());
 
         assertThrows(UserExceptions.NotFoundException.class,
-                () -> bookingService.getBookingsByUserId(99L));
+                () -> bookingService.getBookingsByUserId(99L, currentUser));
 
         verify(bookingRepository, never()).findAllByUserId(99L);
     }
@@ -369,7 +373,7 @@ public class BookingServiceTests {
         when(bookingRepository.findAllByEventId(event.getId()))
                 .thenReturn(List.of(booking));
 
-        List<BookingResponseDto> result = bookingService.getBookingsByEventId(event.getId());
+        List<BookingResponseDto> result = bookingService.getBookingsByEventId(event.getId(), currentUser);
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -383,7 +387,7 @@ public class BookingServiceTests {
                 .thenReturn(Optional.empty());
 
         assertThrows(EventExceptions.NotFoundExceptions.class,
-                () -> bookingService.getBookingsByEventId(99L));
+                () -> bookingService.getBookingsByEventId(99L, currentUser));
 
         verify(bookingRepository, never()).findAllByEventId(99L);
     }
@@ -423,7 +427,7 @@ public class BookingServiceTests {
                 .thenReturn(List.of(booking));
 
         List<BookingResponseDto> result = bookingService
-                .getBookingsByUserIdAndStatus(1L, BookingStatus.ON_HOLD);
+                .getBookingsByUserIdAndStatus(1L, BookingStatus.ON_HOLD, currentUser);
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -440,7 +444,7 @@ public class BookingServiceTests {
                 .thenReturn(List.of());
 
         List<BookingResponseDto> result = bookingService
-                .getBookingsByUserIdAndStatus(1L, BookingStatus.CONFIRMED);
+                .getBookingsByUserIdAndStatus(1L, BookingStatus.CONFIRMED, currentUser);
 
         assertNotNull(result);
         assertEquals(0, result.size());
@@ -454,7 +458,7 @@ public class BookingServiceTests {
                 .thenReturn(Optional.empty());
 
         assertThrows(UserExceptions.NotFoundException.class,
-                () -> bookingService.getBookingsByUserIdAndStatus(99L, BookingStatus.ON_HOLD));
+                () -> bookingService.getBookingsByUserIdAndStatus(99L, BookingStatus.ON_HOLD, currentUser));
 
         verifyNoInteractions(bookingRepository);
     }

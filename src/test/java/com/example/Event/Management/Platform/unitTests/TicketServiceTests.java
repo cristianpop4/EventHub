@@ -6,12 +6,15 @@ import com.example.Event.Management.Platform.model.dto.TicketUpdateDto;
 import com.example.Event.Management.Platform.model.entity.Event;
 import com.example.Event.Management.Platform.model.entity.Location;
 import com.example.Event.Management.Platform.model.entity.Ticket;
+import com.example.Event.Management.Platform.model.entity.User;
 import com.example.Event.Management.Platform.model.enums.EventCategory;
+import com.example.Event.Management.Platform.model.enums.Role;
 import com.example.Event.Management.Platform.model.enums.TicketType;
 import com.example.Event.Management.Platform.model.exceptions.EventExceptions;
 import com.example.Event.Management.Platform.model.exceptions.TicketExceptions;
 import com.example.Event.Management.Platform.repository.EventRepository;
 import com.example.Event.Management.Platform.repository.TicketRepository;
+import com.example.Event.Management.Platform.security.CustomUserDetails;
 import com.example.Event.Management.Platform.service.serviceImpl.TicketServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,11 +48,23 @@ public class TicketServiceTests {
 
     private Ticket ticket;
     private Event event;
+    private User organizer;
+    private CustomUserDetails currentUser;
     private TicketRequestDto ticketRequest;
     private TicketUpdateDto ticketUpdate;
 
     @BeforeEach
     void setUp() {
+        organizer = new User(
+                1L,
+                "Organizer",
+                "organizer@example.com",
+                "Password12!",
+                Role.ROLE_ORGANIZER
+        );
+
+        currentUser = new CustomUserDetails(organizer);
+
         ticketRequest = new TicketRequestDto(
                 1L,
                 TicketType.STANDARD,
@@ -80,7 +95,7 @@ public class TicketServiceTests {
                 ),
                 LocalDateTime.of(2026, 6, 15, 12, 0, 0),
                 200,
-                null,
+                organizer,
                 List.of(ticket),
                 null
         );
@@ -256,7 +271,7 @@ public class TicketServiceTests {
         when(ticketRepository.save(any(Ticket.class)))
                 .thenReturn(ticket);
 
-        TicketResponseDto response = ticketService.updateTicket(1L, ticketUpdate);
+        TicketResponseDto response = ticketService.updateTicket(1L, ticketUpdate, currentUser);
 
         assertEquals(TicketType.STANDARD, response.type());
         assertEquals(109.9, response.price());
@@ -276,7 +291,7 @@ public class TicketServiceTests {
                 .thenReturn(Optional.empty());
 
         assertThrows(TicketExceptions.NotFoundException.class,
-                () -> ticketService.updateTicket(99L, ticketUpdate));
+                () -> ticketService.updateTicket(99L, ticketUpdate, currentUser));
 
         verifyNoInteractions(eventRepository);
         verify(ticketRepository, never()).save(any());
@@ -295,7 +310,7 @@ public class TicketServiceTests {
                 .thenReturn(Optional.empty());
 
         assertThrows(EventExceptions.NotFoundExceptions.class,
-                () -> ticketService.updateTicket(1L, updateWithMissingEvent));
+                () -> ticketService.updateTicket(1L, updateWithMissingEvent, currentUser));
 
         verify(ticketRepository, never()).save(any());
     }
@@ -313,7 +328,7 @@ public class TicketServiceTests {
         );
 
         assertThrows(TicketExceptions.InvalidDataException.class,
-                () -> ticketService.updateTicket(1L, updateWithNegativePrice));
+                () -> ticketService.updateTicket(1L, updateWithNegativePrice, currentUser));
 
         verify(ticketRepository, never()).save(any());
     }
@@ -331,7 +346,7 @@ public class TicketServiceTests {
         );
 
         assertThrows(TicketExceptions.InvalidDataException.class,
-                () -> ticketService.updateTicket(1L, updateWithNegativeQuantity));
+                () -> ticketService.updateTicket(1L, updateWithNegativeQuantity, currentUser));
 
         verify(ticketRepository, never()).save(any());
     }
@@ -348,7 +363,7 @@ public class TicketServiceTests {
                 .thenThrow(new DataAccessResourceFailureException("DB unavailable"));
 
         assertThrows(TicketExceptions.DataAccessException.class,
-                () -> ticketService.updateTicket(1L, ticketUpdate));
+                () -> ticketService.updateTicket(1L, ticketUpdate, currentUser));
 
         verify(ticketRepository, never()).save(any());
     }
@@ -369,7 +384,7 @@ public class TicketServiceTests {
                 .thenReturn(200);
 
         assertThrows(TicketExceptions.CapacityExceededException.class,
-                () -> ticketService.updateTicket(1L, updateOverCapacity));
+                () -> ticketService.updateTicket(1L, updateOverCapacity, currentUser));
 
         verify(ticketRepository, never()).save(any());
     }
@@ -379,7 +394,7 @@ public class TicketServiceTests {
         when(ticketRepository.findById(1L))
                 .thenReturn(Optional.of(ticket));
 
-        ticketService.deleteTicketById(1L);
+        ticketService.deleteTicketById(1L, currentUser);
 
         verify(ticketRepository).delete(any());
     }
@@ -390,7 +405,7 @@ public class TicketServiceTests {
                 .thenReturn(Optional.empty());
 
         assertThrows(TicketExceptions.NotFoundException.class,
-                () -> ticketService.deleteTicketById(99L));
+                () -> ticketService.deleteTicketById(99L, currentUser));
 
         verify(ticketRepository, never()).deleteById(any());
     }
